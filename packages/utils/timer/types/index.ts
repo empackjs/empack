@@ -1,4 +1,4 @@
-import { Response, Request } from "express";
+import { Response, Request } from "../../../core";
 
 export type TimeSpan = {
   id: number;

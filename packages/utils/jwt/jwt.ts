@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
 import { JwtHandler, JwtHandlerResult, JwTokenSettings } from "./types";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { IJwTokenHelper } from "./interfaces";
+import { NextFunction, Response, Request } from "../../core";
 
 export function jwtGuard(secret: string, handler?: JwtHandler) {
   return (req: Request, res: Response, next: NextFunction) => {

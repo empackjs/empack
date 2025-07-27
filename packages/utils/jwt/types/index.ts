@@ -1,5 +1,5 @@
-import { NextFunction, Response, Request } from "express";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
+import { NextFunction, Request, Response } from "../../../core";
 
 export type JwtHandlerResult = {
   status: number;
