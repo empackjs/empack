@@ -11,8 +11,6 @@
     "pack": "npm run build && npm run copy && cd ./dist && npm pack",
     "pub": "npm run build && npm run copy && cd ./dist && npm publish"
   },
-  "main": "./index.js",
-  "module": "./index.mjs",
   "types": "./index.d.ts",
   "exports": {
     ".": {
