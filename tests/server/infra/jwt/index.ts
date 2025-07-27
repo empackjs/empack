@@ -1,4 +1,5 @@
-import { BindingScope, JwTokenHelper, JwTokenSettings, Module } from "../../../../packages/core";
+import { BindingScope, Module } from "@empackjs/core";
+import { JwTokenHelper, JwTokenSettings } from "@empackjs/utils";
 
 export const AccessTokenSymbol = Symbol.for("ACCESSTOKEN");
 export const RefreshTokenSymbol = Symbol.for("REFRESHTOKEN");

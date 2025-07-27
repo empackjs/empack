@@ -8,7 +8,8 @@ import {
   ScopeTestSymbol,
   UserRoot,
 } from "../../../../domain/user/user.root";
-import { ErrorReturn, HandleFor, inject, IReqHandler, OkReturn, OneOf, Track, uuid } from "../../../../../../packages/core";
+import { ErrorReturn, OkReturn, OneOf, Track, uuid } from "@empackjs/utils";
+import { HandleFor, inject, IReqHandler } from "@empackjs/core";
 
 @Track()
 @HandleFor(RegisterCommand)

@@ -1,6 +1,7 @@
-import { ApiArrayProperty, ApiProperty, body, createRule } from "../../../../../packages/core";
+import { ApiArrayProperty, ApiProperty } from "@empackjs/core";
 import { ErrorBody } from "../../../controller/error-body";
 import { INVALID_CODES } from "../../invalid-codes";
+import { body, createRule } from "@empackjs/utils";
 
 export class RegisterRes {
   @ApiProperty({

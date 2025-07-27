@@ -1,4 +1,4 @@
-import { ILogger, ILoggerSymbol, inject, IWebSocket, RawData, WebSocketContext, WsController } from "../../../packages/core";
+import { ILogger, ILoggerSymbol, inject, IWebSocket, RawData, WebSocketContext, WsController } from "@empackjs/core";
 
 @WsController("/chat/room/:id")
 export class ChatWebSocket implements IWebSocket {

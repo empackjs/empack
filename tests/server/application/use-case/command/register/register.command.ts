@@ -1,5 +1,6 @@
-import { MediatedRequest, OneOf } from "../../../../../../packages/core";
+import { MediatedRequest } from "@empackjs/core";
 import { RegisterError, RegisterResult } from "./register.result";
+import { OneOf } from "@empackjs/utils";
 
 export class RegisterCommand extends MediatedRequest<
   OneOf<RegisterResult, RegisterError>

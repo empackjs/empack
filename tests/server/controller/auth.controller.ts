@@ -12,7 +12,8 @@ import { ScopeTest, ScopeTestSymbol } from "../domain/user/user.root";
 import { AsyncTestMiddleware } from "../middleware";
 import { UploadFile } from "../contract/auth/file";
 import { GetIdParams, GetIdQuery, GetIdRes } from "../contract/auth/getId";
-import { ApiDoc, Controller, createMulter, FromBody, FromParam, FromQuery, Get, Guard, inject, matchResult, MediatedController, Multipart, Post, Responses, Track, uploader, validate } from "../../../packages/core";
+import { ApiDoc, Controller, createMulter, FromBody, FromParam, FromQuery, Get, Guard, inject, MediatedController, Multipart, Post, Responses, uploader } from "@empackjs/core";
+import { matchResult, Track, validate } from "@empackjs/utils";
 
 const storage: uploader.DiskStorageOptions = {
   destination: `${process.cwd()}/tests/upload_test/`,

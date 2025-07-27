@@ -1,6 +1,7 @@
-import { injectable, Track } from "../../../../packages/core";
-import { IUserRepository } from "../../application/persistence/user.repository";
+import { Track } from "@empackjs/utils";
 import { UserRoot } from "../../domain/user/user.root";
+import { injectable } from "@empackjs/core";
+import { IUserRepository } from "../../application/persistence/user.repository";
 
 const memory_db: UserRoot[] = [];
 

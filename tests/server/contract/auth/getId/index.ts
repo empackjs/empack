@@ -1,4 +1,4 @@
-import { ApiProperty } from "../../../../../packages/core";
+import { ApiProperty } from "@empackjs/core";
 
 export class GetIdParams {
   @ApiProperty({

@@ -5,7 +5,10 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:deploy": "vitepress build docs && gh-pages -d docs/.vitepress/dist"
+    "docs:deploy": "vitepress build docs && gh-pages -d docs/.vitepress/dist",
+    "pack:core": "cd ./packages/core && npm run pack",
+    "pack:utils": "cd ./packages/utils && npm run pack",
+    "test:upd": "npm run pack:core && npm run pack:utils && cp ./packages/core/dist/*.tgz ./packages/utils/dist/*.tgz ./tests/pack && cd ./tests && npm install ./pack/*.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

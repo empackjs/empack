@@ -2,14 +2,9 @@ import path from "path";
 import { controllers, wsControllers } from "./controller";
 import { handlers } from "./application/handlers";
 import { ScopeTest, ScopeTestSymbol } from "./domain/user/user.root";
-import {
-  App,
-  jwtGuard,
-  Logger,
-  LOGGER_LEVEL,
-  timerMiddleware,
-} from "../../packages/core";
 import { JwtModule } from "./infra/jwt";
+import { App } from "@empackjs/core";
+import { jwtGuard, Logger, LOGGER_LEVEL, timerMiddleware } from "@empackjs/utils";
 
 const app = App.createBuilder();
 

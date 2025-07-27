@@ -1,4 +1,4 @@
-import { ApiArrayProperty, ApiProperty, MulterFile } from "../../../../../packages/core";
+import { ApiArrayProperty, ApiProperty, MulterFile } from "@empackjs/core";
 
 export class UploadFile {
   @ApiProperty({

@@ -1,4 +1,4 @@
-import { IEventHandler, ILogger, ILoggerSymbol, inject, Subscribe } from "../../../../packages/core";
+import { IEventHandler, ILogger, ILoggerSymbol, inject, Subscribe } from "@empackjs/core";
 import { LoginFailedEvent } from "../use-case/command/login/events/loginFailed.event";
 
 @Subscribe(LoginFailedEvent)

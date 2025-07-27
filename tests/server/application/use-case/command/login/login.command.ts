@@ -1,5 +1,6 @@
-import { MediatedRequest, OneOf } from "../../../../../../packages/core";
+import { MediatedRequest } from "@empackjs/core";
 import { LoginError, LoginResult } from "./login.result";
+import { OneOf } from "@empackjs/utils";
 
 export class LoginCommand extends MediatedRequest<OneOf<LoginResult, LoginError>> {
   readonly account: string;
