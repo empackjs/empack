@@ -21,7 +21,7 @@ export default defineConfig({
           },
         ],
         socialLinks: [
-          { icon: "github", link: "https://github.com/zongben/empack" },
+          { icon: "github", link: "https://github.com/empackjs/empack" },
         ],
       },
     },
