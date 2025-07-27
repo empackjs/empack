@@ -5,7 +5,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:deploy": "ts-node scripts/deploy-docs.ts"
+    "docs:deploy": "vitepress build docs && gh-pages -d docs/.vitepress/dist"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -13,6 +13,7 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^9.32.0",
+    "gh-pages": "^6.3.0",
     "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
