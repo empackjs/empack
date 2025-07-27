@@ -5,7 +5,6 @@
     "emitDecoratorMetadata": true,
     "types": [
       "reflect-metadata",
-      "jest",
       "node"
     ],
     "module": "Node16",
@@ -25,10 +24,8 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "rooDir": "./src",
   "exclude": [
     "node_modules",
-    "**/jest.setup.ts",
     "**/dist"
   ]
 }

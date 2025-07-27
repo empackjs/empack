@@ -1,8 +1,4 @@
-import { body, createRule } from "../../../../../src";
-import {
-  ApiArrayProperty,
-  ApiProperty,
-} from "../../../../../src/openapi/decorator";
+import { ApiArrayProperty, ApiProperty, body, createRule } from "../../../../../packages/core";
 import { ErrorBody } from "../../../controller/error-body";
 import { INVALID_CODES } from "../../invalid-codes";
 

@@ -1,4 +1,4 @@
-import { ApiProperty } from "../../../../../src";
+import { ApiProperty } from "../../../../../packages/core";
 
 export class GetIdParams {
   @ApiProperty({

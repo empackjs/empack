@@ -1,5 +1,4 @@
-import { BindingScope, Module } from "../../../../src";
-import { JwTokenHelper, JwTokenSettings } from "../../../../src";
+import { BindingScope, JwTokenHelper, JwTokenSettings, Module } from "../../../../packages/core";
 
 export const AccessTokenSymbol = Symbol.for("ACCESSTOKEN");
 export const RefreshTokenSymbol = Symbol.for("REFRESHTOKEN");

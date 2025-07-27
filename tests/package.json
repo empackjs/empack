@@ -1,0 +1,10 @@
+{
+  "name": "empackjs-tests",
+  "private": true,
+  "scripts": {
+    "server": "nodemon ./server/main.ts"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

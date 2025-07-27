@@ -1,72 +1,22 @@
 {
-  "name": "empack",
-  "version": "0.0.30",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zongben/empack.git"
-  },
+  "name": "empackjs-monorepo",
+  "private": true,
   "scripts": {
-    "build": "tsup",
-    "copy": "cp ./package.json ./README.md ./LICENSE ./dist/",
-    "pack": "npm run build && npm run copy && cd ./dist && npm pack",
-    "pub": "npm run build && npm run copy && cd ./dist && npm publish",
-    "test:server": "nodemon tests/server/main.ts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:deploy": "ts-node scripts/deploy-docs.ts"
   },
-  "main": "./index.js",
-  "module": "./index.mjs",
-  "types": "./index.d.ts",
-  "exports": {
-    ".": {
-      "require": "./index.js",
-      "import": "./index.mjs"
-    }
-  },
-  "files": [
-    "./index.*"
-  ],
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@swc/core": "^1.13.2",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jest": "^30.0.0",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
     "@types/node": "^24.1.0",
-    "@types/on-finished": "^2.3.5",
-    "@types/swagger-ui-express": "^4.1.8",
-    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^9.32.0",
-    "globals": "^16.3.0",
-    "jest": "^30.0.5",
-    "nodemon": "^3.1.10",
     "reflect-metadata": "^0.2.2",
-    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vitepress": "^1.6.3"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
-    "express-validator": "^7.2.1",
-    "inversify": "^7.6.1",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2",
-    "path-to-regexp": "^8.2.0",
-    "swagger-ui-express": "^5.0.1",
-    "uuid": "^11.1.0",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0",
-    "ws": "^8.18.3"
   }
 }

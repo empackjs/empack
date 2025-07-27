@@ -5,5 +5,5 @@ execSync(
   'cd docs/.vitepress/dist && git init && git add . && git commit -m "deploy docs"',
 );
 execSync(
-  "cd docs/.vitepress/dist && git push -f git@github.com:zongben/empack.git main:gh-pages",
+  "cd docs/.vitepress/dist && git push -f git@github.com:empackjs/empack.git main:github-pages",
 );

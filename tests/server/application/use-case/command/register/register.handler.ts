@@ -1,7 +1,3 @@
-import { inject, IReqHandler } from "../../../../../../src";
-import { HandleFor } from "../../../../../../src";
-import { ErrorReturn, OkReturn, OneOf } from "../../../../../../src";
-import { Track, uuid } from "../../../../../../src";
 import { UserRepository } from "../../../../infra/repository/user.repository";
 import { ErrorCodes } from "../../../error-codes";
 import { IUserRepository } from "../../../persistence/user.repository";
@@ -12,6 +8,7 @@ import {
   ScopeTestSymbol,
   UserRoot,
 } from "../../../../domain/user/user.root";
+import { ErrorReturn, HandleFor, inject, IReqHandler, OkReturn, OneOf, Track, uuid } from "../../../../../../packages/core";
 
 @Track()
 @HandleFor(RegisterCommand)

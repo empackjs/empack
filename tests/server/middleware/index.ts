@@ -1,7 +1,10 @@
-import { inject } from "../../../src";
-import { EmpackMiddlewareFunction, ILoggerSymbol } from "../../../src";
-import { ILogger } from "../../../src";
-import { IEmpackMiddleware } from "../../../src/app/interfaces";
+import {
+  EmpackMiddlewareFunction,
+  IEmpackMiddleware,
+  ILogger,
+  ILoggerSymbol,
+  inject,
+} from "../../../packages/core";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

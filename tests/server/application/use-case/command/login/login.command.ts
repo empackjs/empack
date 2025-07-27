@@ -1,5 +1,4 @@
-import { MediatedRequest } from "../../../../../../src";
-import { OneOf } from "../../../../../../src";
+import { MediatedRequest, OneOf } from "../../../../../../packages/core";
 import { LoginError, LoginResult } from "./login.result";
 
 export class LoginCommand extends MediatedRequest<OneOf<LoginResult, LoginError>> {

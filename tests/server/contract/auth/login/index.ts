@@ -1,4 +1,4 @@
-import { body, createRule } from "../../../../../src";
+import { body, createRule } from "../../../../../packages/core";
 import { ErrorBody } from "../../../controller/error-body";
 import { INVALID_CODES } from "../../invalid-codes";
 

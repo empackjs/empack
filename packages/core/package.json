@@ -1,0 +1,53 @@
+{
+  "name": "@empackjs/core",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/empackjs/empack"
+  },
+  "scripts": {
+    "build": "tsup",
+    "copy": "cp ./package.json ./README.md ./LICENSE ./dist/",
+    "pack": "npm run build && npm run copy && cd ./dist && npm pack",
+    "pub": "npm run build && npm run copy && cd ./dist && npm publish"
+  },
+  "main": "./index.js",
+  "module": "./index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    }
+  },
+  "files": [
+    "./index.*"
+  ],
+  "devDependencies": {
+    "@swc/core": "^1.13.2",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/on-finished": "^2.3.5",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/ws": "^8.18.1",
+    "globals": "^16.3.0",
+    "tsup": "^8.5.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "inversify": "^7.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "path-to-regexp": "^8.2.0",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.18.3"
+  }
+}

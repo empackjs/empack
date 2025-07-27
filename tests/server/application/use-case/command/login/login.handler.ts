@@ -1,8 +1,4 @@
-import { IReqHandler, Track } from "../../../../../../src";
-import { inject } from "../../../../../../src";
-import { IJwTokenHelper } from "../../../../../../src";
-import { HandleFor, IPublisher, IPublisherSymbol } from "../../../../../../src";
-import { ErrorReturn, OkReturn, OneOf } from "../../../../../../src";
+import { ErrorReturn, HandleFor, IJwTokenHelper, inject, IPublisher, IPublisherSymbol, IReqHandler, OkReturn, OneOf, Track } from "../../../../../../packages/core";
 import { AccessTokenSymbol, RefreshTokenSymbol } from "../../../../infra/jwt";
 import { UserRepository } from "../../../../infra/repository/user.repository";
 import { ErrorCodes } from "../../../error-codes";

@@ -1,8 +1,5 @@
-import { inject } from "inversify";
-import { IEventHandler, Subscribe } from "../../../../src";
+import { IEventHandler, ILogger, ILoggerSymbol, inject, Subscribe } from "../../../../packages/core";
 import { LoginFailedEvent } from "../use-case/command/login/events/loginFailed.event";
-import { ILoggerSymbol } from "../../../../src";
-import { ILogger } from "../../../../src";
 
 @Subscribe(LoginFailedEvent)
 export class SendEmail implements IEventHandler<LoginFailedEvent> {

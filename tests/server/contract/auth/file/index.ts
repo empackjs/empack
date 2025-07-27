@@ -1,4 +1,4 @@
-import { ApiArrayProperty, ApiProperty, MulterFile } from "../../../../../src";
+import { ApiArrayProperty, ApiProperty, MulterFile } from "../../../../../packages/core";
 
 export class UploadFile {
   @ApiProperty({

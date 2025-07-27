@@ -8,7 +8,7 @@ import {
   Logger,
   LOGGER_LEVEL,
   timerMiddleware,
-} from "../../src";
+} from "../../packages/core";
 import { JwtModule } from "./infra/jwt";
 
 const app = App.createBuilder();
