@@ -15,7 +15,7 @@ The framework is designed to provide a safe and lightweight development experien
 ## Installation
 
 ```bash
-npm i empack
+npm i @empackjs/core
 ```
 
 ## Usage
