@@ -1,0 +1,6 @@
+node_modules
+log
+**/upload_test/**
+dist
+docs/.vitepress/dist
+docs/.vitepress/cache
