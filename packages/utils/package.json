@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "copy": "cp ./package.json ./README.md ./LICENSE ./dist/",
+    "copy": "cp ./package.json ./README.md ./dist/",
     "pack": "npm run build && npm run copy && cd ./dist && npm pack",
     "pub": "npm run build && npm run copy && cd ./dist && npm publish --access public"
   },
