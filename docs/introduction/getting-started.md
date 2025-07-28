@@ -1,5 +1,9 @@
 # Getting Started
 
+> [!NOTE]
+Empack is currently designed for TypeScript projects only.  
+This guide assumes you're already familiar with basic TypeScript usage.
+
 First, install `@empackjs/core` and `reflect-metadata`:
 
 ```sh
@@ -40,7 +44,8 @@ App.createBuilder((opt) => {
   .run();
 ```
 
-The server will start at localhost:3000. You can test the API using curl:
+The server will start at localhost:3000. You can test the API using browser  
+http://localhost:3000/api/hello or using curl
 
 ```sh
 curl -X GET http://localhost:3000/api/hello

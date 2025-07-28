@@ -4,29 +4,22 @@ An Express-based web server framework.
 
 ## Description
 
-Empack is an Express-based web server framework that integrates common utilities for building backend applications.  
+Empack is a **lightweight**, **Nest-like** backend web framework built on top of **Express**. It aims to deliver a structured and scalable development experience while remaining simple and unobtrusive. Developers can focus on building business logic without getting bogged down by server configuration or boilerplate code.
 
-It comes with a built-in dependency injection container powered by [Inversify](https://github.com/inversify/InversifyJS), and promotes the use of the *CQRS pattern* in web development. 
+Unlike NestJS, Empack focuses on minimalism and fast setup, making it ideal for small to medium-sized projects that value simplicity and flexibility.
 
-Empack also introduces an error-handling model inspired by Rust, encouraging developers to handle errors explicitly using result types instead of relying on `throw` statements.
+Empack is fully compatible with the existing Express ecosystem, allowing you to use popular Express middleware, libraries, and tools out of the box.
 
-The framework is designed to provide a safe and lightweight development experience.
+It includes a built-in **dependency injection (DI) container** powered by [Inversify](https://github.com/inversify/InversifyJS), **route-based WebSocket support**, a **mediator pattern** implementation for CQRS, and **automatic OpenAPI documentation generation**.
+
+With **TypeScript decorators**, Empack simplifies the registration of controllers, routes, openAPI, and more. Its built-in mediator allows for clean separation of concerns and full decoupling between controllers and business logic—making CQRS and modular architecture easy to adopt.
 
 ## Installation
 
 ```bash
-npm i empack
+npm i @empackjs/core
 ```
 
-## Usage
+## Documentation
 
-Empack currently supports `TypeScript only` as the programming language.
-To enable decorator support and metadata reflection, make sure to include the following options in your `tsconfig.json`:
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
-}
-```
+For more information, see the [documentation](https://empackjs.github.io/empack/)
