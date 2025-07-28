@@ -6,7 +6,6 @@ import express, {
   RequestHandler,
   ErrorRequestHandler,
 } from "express";
-import dotenv from "dotenv";
 import "reflect-metadata";
 import { Container, Newable } from "inversify";
 import http, { IncomingMessage } from "http";
@@ -127,12 +126,7 @@ async function resolveMiddleware(
 }
 
 class Env implements IEnv {
-  #env;
-
-  constructor(path: string) {
-    dotenv.config({ path });
-    this.#env = process.env;
-  }
+  #env = process.env;
 
   get(key: string): string {
     const value = this.#env[key];
@@ -245,10 +239,9 @@ export class App {
     return this;
   }
 
-  setDotEnv(path: string) {
-    this.env = new Env(path);
+  setDotEnv() {
+    this.env = new Env();
     this.serviceContainer.bind<IEnv>(IEnvSymbol).toConstantValue(this.env);
-    this.logger.info(`Dotenv is loaded from ${path}`);
     return this;
   }
 

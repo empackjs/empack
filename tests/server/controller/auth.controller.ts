@@ -9,11 +9,26 @@ import {
 } from "../contract/auth/register";
 import { RegisterCommand } from "../application/use-case/command/register/register.command";
 import { ScopeTest, ScopeTestSymbol } from "../domain/user/user.root";
-import { AsyncTestMiddleware } from "../middleware";
 import { UploadFile } from "../contract/auth/file";
 import { GetIdParams, GetIdQuery, GetIdRes } from "../contract/auth/getId";
-import { ApiDoc, Controller, createMulter, FromBody, FromParam, FromQuery, Get, Guard, inject, MediatedController, Multipart, Post, Responses, uploader } from "@empackjs/core";
+import {
+  ApiDoc,
+  Controller,
+  createMulter,
+  FromBody,
+  FromParam,
+  FromQuery,
+  Get,
+  Guard,
+  inject,
+  MediatedController,
+  Multipart,
+  Post,
+  Responses,
+  uploader,
+} from "@empackjs/core";
 import { matchResult, Track, validate } from "@empackjs/utils";
+import { AsyncTestMiddleware } from "../middleware";
 
 const storage: uploader.DiskStorageOptions = {
   destination: `${process.cwd()}/tests/upload_test/`,
@@ -122,10 +137,7 @@ export class AuthController extends MediatedController {
     });
   }
 
-  @Get("/empty", AsyncTestMiddleware, (_req, _res, next) => {
-    console.log("sync function");
-    next();
-  })
+  @Get("/empty", AsyncTestMiddleware)
   async empty() {}
 
   @Post("/error", AsyncTestMiddleware)

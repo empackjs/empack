@@ -4,11 +4,20 @@ import { handlers } from "./application/handlers";
 import { ScopeTest, ScopeTestSymbol } from "./domain/user/user.root";
 import { JwtModule } from "./infra/jwt";
 import { App } from "@empackjs/core";
-import { jwtGuard, Logger, LOGGER_LEVEL, timerMiddleware } from "@empackjs/utils";
+import {
+  jwtGuard,
+  Logger,
+  LOGGER_LEVEL,
+  timerMiddleware,
+} from "@empackjs/utils";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: path.join(__dirname, ".env.test"),
+});
 
 const app = App.createBuilder();
-
-app.setDotEnv(path.join(__dirname, ".env.test"));
+app.setDotEnv();
 const nodeEnv = app.env.get("NODE_ENV");
 const jwtSecret = app.env.get("JWT_SECRET");
 const accessTokenExpiresIn = parseInt(app.env.get("ACCESSTOKEN_EXPIRES_IN"));
