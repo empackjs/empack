@@ -12,10 +12,10 @@ hero:
   actions:
     - theme: brand
       text: Getting Started
-      link: /getting-started
-    # - theme: alt
-    #   text: API Docs
-    #   link: /api-docs
+      link: /introduction/getting-started
+    - theme: alt
+      text: Guide
+      link: /guide/app
 
 features:
   - title: Express-Compatible

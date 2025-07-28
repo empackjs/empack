@@ -13,11 +13,45 @@ export default defineConfig({
       lang: "en-us",
       link: "/",
       themeConfig: {
-        nav: [{ text: "Guide", link: "/guide" }],
+        nav: [{ text: "Guide", link: "/guide/app" }],
         sidebar: [
           {
             text: "Introduction",
-            items: [{ text: "Getting Started", link: "/getting-started" }],
+            items: [
+              {
+                text: "What is Empack",
+                link: "/introduction/what-is-empack",
+              },
+              {
+                text: "Getting Started",
+                link: "/introduction/getting-started",
+              },
+            ],
+          },
+          {
+            text: "Guide",
+            items: [
+              {
+                text: "App",
+                link: "/guide/app",
+              },
+              {
+                text: "Controller",
+                link: "/guide/controller",
+              },
+              {
+                text: "Middleware",
+                link: "/guide/middleware",
+              },
+              {
+                text: "DI Container",
+                link: "/guide/di-container",
+              },
+              {
+                text: "Open API",
+                link: "/guide/open-api",
+              },
+            ],
           },
         ],
         socialLinks: [
