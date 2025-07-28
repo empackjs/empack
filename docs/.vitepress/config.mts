@@ -48,6 +48,10 @@ export default defineConfig({
                 link: "/guide/di-container",
               },
               {
+                text: "Mediator",
+                link: "/guide/mediator",
+              },
+              {
                 text: "Open API",
                 link: "/guide/open-api",
               },
