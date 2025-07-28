@@ -37,9 +37,7 @@ class MyController {
   }
 }
 
-App.createBuilder((opt) => {
-  opt.routerPrefix = "/api";
-})
+App.createBuilder()
   .mapController([MyController])
   .run();
 ```

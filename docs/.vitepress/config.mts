@@ -13,6 +13,7 @@ export default defineConfig({
       lang: "en-us",
       link: "/",
       themeConfig: {
+        outline: [3, 4],
         nav: [{ text: "Guide", link: "/guide/app" }],
         sidebar: [
           {
