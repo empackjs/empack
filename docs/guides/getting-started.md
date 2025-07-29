@@ -42,7 +42,7 @@ App.createBuilder()
   .run();
 ```
 
-The server will start at localhost:3000. You can test the API using browser http://localhost:3000/api/hello or using curl
+The server will start at localhost:3000. You can test the API using browser or using curl
 
 ```sh
 curl -X GET http://localhost:3000/api/hello

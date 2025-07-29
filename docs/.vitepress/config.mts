@@ -13,7 +13,7 @@ export default defineConfig({
       lang: "en-us",
       link: "/",
       themeConfig: {
-        outline: [3, 4],
+        outline: [2, 3],
         nav: [{ text: "Guides", link: "/guides/getting-started" }],
         sidebar: [
           {

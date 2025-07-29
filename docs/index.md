@@ -11,6 +11,9 @@ hero:
     alt: EmpackLogo
   actions:
     - theme: brand
+      text: What is Empack
+      link: /introduction/what-is-empack
+    - theme: alt
       text: Getting Started
       link: /guides/getting-started
 
