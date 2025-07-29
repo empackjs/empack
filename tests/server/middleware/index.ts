@@ -13,7 +13,7 @@ function delay(ms: number) {
 export class AsyncTestMiddleware implements IEmpackMiddleware {
   constructor(@inject(TOKEN.ILogger) private logger: ILogger) {}
 
-  use(): EmpackMiddlewareFunction | Promise<EmpackMiddlewareFunction> {
+  use(): EmpackMiddlewareFunction {
     return async (_req, _res, next) => {
       this.logger.debug("Middleware start");
       await delay(1000);

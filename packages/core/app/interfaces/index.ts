@@ -17,7 +17,7 @@ export interface IEnv {
 }
 
 export interface IEmpackMiddleware {
-  use(): EmpackMiddlewareFunction | Promise<EmpackMiddlewareFunction>;
+  use(): EmpackMiddlewareFunction;
 }
 
 export interface IEmpackExceptionMiddleware {
@@ -26,7 +26,5 @@ export interface IEmpackExceptionMiddleware {
     req: Request,
     res: Response,
     next: NextFunction,
-  ):
-    | EmpackExceptionMiddlewareFunction
-    | Promise<EmpackExceptionMiddlewareFunction>;
+  ): EmpackExceptionMiddlewareFunction;
 }

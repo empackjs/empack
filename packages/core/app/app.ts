@@ -111,7 +111,7 @@ async function resolveMiddleware(
     throw new Error(`Middleware ${middleware.name} is missing 'use' method.`);
   }
 
-  const resolved = await instance.use();
+  const resolved = instance.use();
 
   if (typeof resolved !== "function") {
     throw new Error(
