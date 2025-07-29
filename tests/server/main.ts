@@ -61,7 +61,7 @@ app.useCors({
   credentials: true,
 });
 app.useJsonParser();
-app.useUrlEncodedParser({ extended: true });
+app.useUrlEncodedParser();
 app.useMiddleware(timerMiddleware(app.logger));
 app.mapController(controllers);
 app.enableWebSocket(wsControllers);

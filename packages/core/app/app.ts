@@ -648,7 +648,9 @@ export class App {
     return this;
   }
 
-  useUrlEncodedParser(options?: bodyParser.OptionsUrlencoded) {
+  useUrlEncodedParser(
+    options: bodyParser.OptionsUrlencoded = { extended: true },
+  ) {
     this.#app.use(express.urlencoded(options));
     return this;
   }
@@ -660,16 +662,6 @@ export class App {
 
   useStatic(path: string) {
     this.#app.use(express.static(path));
-    return this;
-  }
-
-  disable(setting: string) {
-    this.#app.disable(setting);
-    return this;
-  }
-
-  enable(setting: string) {
-    this.#app.enable(setting);
     return this;
   }
 
