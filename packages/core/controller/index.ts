@@ -21,6 +21,7 @@ export {
   Post,
   Get,
   Put,
+  Patch,
   Delete,
   Controller,
   WsController,

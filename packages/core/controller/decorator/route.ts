@@ -18,6 +18,7 @@ export const Get = createRouteDecorator("get");
 export const Post = createRouteDecorator("post");
 export const Put = createRouteDecorator("put");
 export const Delete = createRouteDecorator("delete");
+export const Patch = createRouteDecorator("patch");
 
 function applyWithData(res: Response, withData: ResponseWith = {}) {
   if (withData.headers) {
