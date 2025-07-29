@@ -14,11 +14,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { Socket } from "net";
 import cors from "cors";
 import bodyParser from "body-parser";
-import {
-  IPublisherSymbol,
-  ISenderSymbol,
-  MediatorPipe,
-} from "../mediator/index";
+import { MEDIATOR_TOKEN, MediatorPipe } from "../mediator/index";
 import {
   EmpackExceptionMiddlewareFunction,
   EmpackMiddleware,
@@ -28,7 +24,6 @@ import {
   OpenApiOptions,
   WsAuthResult,
 } from "./types/index";
-import { IEnvSymbol, ILoggerSymbol } from "./symbols/index";
 import { Module } from "../di/index";
 import { EventMap, MediatorMap } from "../mediator/types/index";
 import { IWebSocket } from "../controller/interfaces/index";
@@ -51,6 +46,7 @@ import { APIDOC_KEY } from "../openapi/decorator";
 import { ApiDocMetaData } from "../openapi/types";
 import { generateOpenApiSpec } from "../openapi/openapi";
 import swaggerUI from "swagger-ui-express";
+import { APP_TOKEN } from "./tokens";
 
 function splitPath(path: string) {
   return path.split("/").filter(Boolean);
@@ -242,7 +238,7 @@ export class App {
 
   setDotEnv() {
     this.env = new Env();
-    this.serviceContainer.bind<IEnv>(IEnvSymbol).toConstantValue(this.env);
+    this.serviceContainer.bind<IEnv>(APP_TOKEN.IEnv).toConstantValue(this.env);
     return this;
   }
 
@@ -268,8 +264,8 @@ export class App {
       this.#eventMap,
       this.#mediatorPipeLine,
     );
-    child.bind(ISenderSymbol).toConstantValue(mediator);
-    child.bind(IPublisherSymbol).toConstantValue(mediator);
+    child.bind(MEDIATOR_TOKEN.ISender).toConstantValue(mediator);
+    child.bind(MEDIATOR_TOKEN.IPublisher).toConstantValue(mediator);
 
     return child;
   }
@@ -759,7 +755,7 @@ export class App {
 
   #bindLogger() {
     this.serviceContainer
-      .rebindSync<ILogger>(ILoggerSymbol)
+      .rebindSync<ILogger>(APP_TOKEN.ILogger)
       .toConstantValue(this.logger);
   }
 

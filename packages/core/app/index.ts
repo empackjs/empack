@@ -1,6 +1,6 @@
 export { NextFunction, Request, Response, Application } from "express";
 export { RawData, WebSocket } from "ws";
-export { ILoggerSymbol, IEnvSymbol } from "./symbols/index";
+export { APP_TOKEN } from "./tokens";
 export type {
   IEnv,
   ILogger,

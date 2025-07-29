@@ -1,4 +1,4 @@
-export { IPublisherSymbol, ISenderSymbol } from "./symbols/index";
+export { MEDIATOR_TOKEN } from "./tokens";
 export type {
   IReqHandler,
   ISender,

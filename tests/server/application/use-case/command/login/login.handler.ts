@@ -1,4 +1,10 @@
-import { ErrorReturn, IJwTokenHelper, OkReturn, OneOf, Track } from "@empackjs/utils";
+import {
+  ErrorReturn,
+  IJwTokenHelper,
+  OkReturn,
+  OneOf,
+  Track,
+} from "@empackjs/utils";
 import { AccessTokenSymbol, RefreshTokenSymbol } from "../../../../infra/jwt";
 import { UserRepository } from "../../../../infra/repository/user.repository";
 import { ErrorCodes } from "../../../error-codes";
@@ -6,7 +12,13 @@ import { IUserRepository } from "../../../persistence/user.repository";
 import { LoginFailedEvent } from "./events/loginFailed.event";
 import { LoginCommand } from "./login.command";
 import { LoginError, LoginResult } from "./login.result";
-import { HandleFor, inject, IPublisher, IPublisherSymbol, IReqHandler } from "@empackjs/core";
+import {
+  HandleFor,
+  inject,
+  IPublisher,
+  IReqHandler,
+  MEDIATOR_TOKEN,
+} from "@empackjs/core";
 
 @Track()
 @HandleFor(LoginCommand)
@@ -14,7 +26,7 @@ export class LoginHandler
   implements IReqHandler<LoginCommand, OneOf<LoginResult, LoginError>>
 {
   constructor(
-    @inject(IPublisherSymbol) private _publisher: IPublisher,
+    @inject(MEDIATOR_TOKEN.IPublisher) private _publisher: IPublisher,
     @inject(UserRepository) private _userRepository: IUserRepository,
     @inject(AccessTokenSymbol)
     private _accessTokenHelper: IJwTokenHelper,
