@@ -5,6 +5,7 @@ import express, {
   Response,
   RequestHandler,
   ErrorRequestHandler,
+  Application,
 } from "express";
 import "reflect-metadata";
 import { Container, Newable } from "inversify";
@@ -219,23 +220,23 @@ export class App {
     return new App(options);
   }
 
-  addSingletonScope(type: symbol, constructor: Newable) {
-    this.serviceContainer.bind(type).to(constructor).inSingletonScope();
+  addSingletonScope(token: symbol, constructor: Newable) {
+    this.serviceContainer.bind(token).to(constructor).inSingletonScope();
     return this;
   }
 
-  addRequestScope(type: symbol, constructor: Newable) {
-    this.#requestScopeObjects.set(type, constructor);
+  addRequestScope(token: symbol, constructor: Newable) {
+    this.#requestScopeObjects.set(token, constructor);
     return this;
   }
 
-  addTransientScope(type: symbol, constructor: Newable) {
-    this.serviceContainer.bind(type).to(constructor).inTransientScope();
+  addTransientScope(token: symbol, constructor: Newable) {
+    this.serviceContainer.bind(token).to(constructor).inTransientScope();
     return this;
   }
 
-  addConstant(types: symbol, instance: any) {
-    this.serviceContainer.bind(types).toConstantValue(instance);
+  addConstant(token: symbol, instance: any) {
+    this.serviceContainer.bind(token).toConstantValue(instance);
     return this;
   }
 
@@ -688,13 +689,28 @@ export class App {
     return this;
   }
 
-  addHeaders(headers: Record<string, string>) {
+  disable(setting: string) {
+    this.#app.disable(setting);
+    return this;
+  }
+
+  enable(setting: string) {
+    this.#app.enable(setting);
+    return this;
+  }
+
+  useHeaders(headers: Record<string, string>) {
     this.#app.use((_req, res, next) => {
       for (const [key, value] of Object.entries(headers)) {
         res.setHeader(key, value);
       }
       next();
     });
+    return this;
+  }
+
+  useExtension(fn: (app: Application) => void) {
+    fn(this.#app);
     return this;
   }
 

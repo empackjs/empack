@@ -1,4 +1,4 @@
-export { NextFunction, Request, Response } from "express";
+export { NextFunction, Request, Response, Application } from "express";
 export { RawData, WebSocket } from "ws";
 export { ILoggerSymbol, IEnvSymbol } from "./symbols/index";
 export type {
