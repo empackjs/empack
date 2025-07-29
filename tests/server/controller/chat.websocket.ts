@@ -1,16 +1,16 @@
 import {
+    APP_TOKEN,
   ILogger,
   inject,
   IWebSocket,
   RawData,
-  TOKEN,
   WebSocketContext,
   WsController,
 } from "@empackjs/core";
 
 @WsController("/chat/room/:id")
 export class ChatWebSocket implements IWebSocket {
-  constructor(@inject(TOKEN.ILogger) private logger: ILogger) {}
+  constructor(@inject(APP_TOKEN.ILogger) private logger: ILogger) {}
 
   onConnected(ctx: WebSocketContext): void | Promise<void> {
     ctx.send(`chat is connected, req:${ctx.req.url}`);

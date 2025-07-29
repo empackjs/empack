@@ -46,7 +46,7 @@ import { APIDOC_KEY } from "../openapi/decorator";
 import { ApiDocMetaData } from "../openapi/types";
 import { generateOpenApiSpec } from "../openapi/openapi";
 import swaggerUI from "swagger-ui-express";
-import { TOKEN } from "../token";
+import { APP_TOKEN } from "../token";
 
 function splitPath(path: string) {
   return path.split("/").filter(Boolean);
@@ -226,7 +226,7 @@ export class App {
 
   setDotEnv() {
     this.env = new Env();
-    this.serviceContainer.bind<IEnv>(TOKEN.IEnv).toConstantValue(this.env);
+    this.serviceContainer.bind<IEnv>(APP_TOKEN.IEnv).toConstantValue(this.env);
     return this;
   }
 
@@ -248,8 +248,8 @@ export class App {
       this.#eventMap,
       this.#mediatorPipeLine,
     );
-    child.bind(TOKEN.ISender).toConstantValue(mediator);
-    child.bind(TOKEN.IPublisher).toConstantValue(mediator);
+    child.bind(APP_TOKEN.ISender).toConstantValue(mediator);
+    child.bind(APP_TOKEN.IPublisher).toConstantValue(mediator);
 
     return child;
   }
@@ -725,7 +725,7 @@ export class App {
 
   #bindLogger() {
     this.serviceContainer
-      .rebindSync<ILogger>(TOKEN.ILogger)
+      .rebindSync<ILogger>(APP_TOKEN.ILogger)
       .toConstantValue(this.logger);
   }
 

@@ -1,10 +1,10 @@
 import { Container, inject, injectable, Newable } from "inversify";
 import { EventMap, MediatorMap } from "./types/index";
 import type { IPublisher, IReqHandler, ISender } from "./interfaces";
-import { TOKEN } from "../token";
+import { APP_TOKEN } from "../token";
 
 export abstract class MediatedController {
-  @inject(TOKEN.ISender) private readonly _sender!: ISender;
+  @inject(APP_TOKEN.ISender) private readonly _sender!: ISender;
 
   async dispatch<
     TReq extends MediatedRequest<TRes>,
