@@ -14,7 +14,7 @@ export default defineConfig({
       link: "/",
       themeConfig: {
         outline: [3, 4],
-        nav: [{ text: "Guide", link: "/guide/app" }],
+        nav: [{ text: "Guides", link: "/guides/getting-started" }],
         sidebar: [
           {
             text: "Introduction",
@@ -23,38 +23,34 @@ export default defineConfig({
                 text: "What is Empack",
                 link: "/introduction/what-is-empack",
               },
-              {
-                text: "Getting Started",
-                link: "/introduction/getting-started",
-              },
             ],
           },
           {
-            text: "Guide",
+            text: "Guides",
             items: [
               {
-                text: "App",
-                link: "/guide/app",
+                text: "Getting Started",
+                link: "/guides/getting-started",
               },
               {
                 text: "Controller",
-                link: "/guide/controller",
+                link: "/guides/controller",
               },
               {
                 text: "Middleware",
-                link: "/guide/middleware",
+                link: "/guides/middleware",
               },
               {
                 text: "DI Container",
-                link: "/guide/di-container",
+                link: "/guides/di-container",
               },
               {
                 text: "Mediator",
-                link: "/guide/mediator",
+                link: "/guides/mediator",
               },
               {
-                text: "Open API",
-                link: "/guide/open-api",
+                text: "OpenAPI",
+                link: "/guides/open-api",
               },
             ],
           },

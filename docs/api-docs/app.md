@@ -34,7 +34,7 @@ The `AppOptions` object allows you to customize global application settings.
 | `wsPrefix`     |`string`  |`""`         | Global prefix for all websocket routes|
 | `setTimeout`   |`number?` |`undefined`  | Custom timeout for HTTP server.       |
 
-### addSingletonScope(type: symbol, constructor: Newable)
+### addSingletonScope(token: symbol, constructor: Newable)
 
 Registers a dependency in singleton scope, meaning it will be created only **once** and reused across the entire application lifecycle.  
 
@@ -55,7 +55,7 @@ Use this for services or resources that should be **shared globally**, such as:
 * Database connections
 * Configuration services
 
-### addConstant(types: symbol, instance: any)
+### addConstant(token: symbol, instance: any)
 
 Registers a pre-instantiated object or value into the DI container. This value will be injected **as Singleton**.
 
@@ -70,7 +70,7 @@ const config = {
 app.addConstant(CONFIG, config);
 ```
 
-### addRequestScope(type: symbol, constructor: Newable)
+### addRequestScope(token: symbol, constructor: Newable)
 
 Registers a class in request scope. A new instance will be created **for each HTTP or WebSocket request**.
 
@@ -84,7 +84,7 @@ Use when the service should be isolated per request, such as:
 * Request ID or trace ID
 * Per-request cache
 
-### addTransientScope(type: symbol, constructor: Newable)
+### addTransientScope(token: symbol, constructor: Newable)
 
 Registers a class in transient scope. A new instance will be created **every time** it is injected or resolved.
 

@@ -12,10 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Getting Started
-      link: /introduction/getting-started
-    - theme: alt
-      text: Guide
-      link: /guide/app
+      link: /guides/getting-started
 
 features:
   - title: Express-Compatible
