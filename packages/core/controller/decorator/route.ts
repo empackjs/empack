@@ -111,7 +111,7 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
                 rawValue = req.cookies;
                 break;
               case "header":
-                rawValue = req.header;
+                rawValue = req.headers;
                 break;
               default:
                 rawValue = undefined;
