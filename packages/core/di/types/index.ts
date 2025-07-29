@@ -9,8 +9,6 @@ export type ContainerModule = {
 };
 
 export type BindingScope = {
-  addSingletonScope(type: symbol, constructor: Newable): void;
-  addRequestScope(type: symbol, constructor: Newable): void;
-  addTransientScope(type: symbol, constructor: Newable): void;
-  addConstant(type: symbol, value: any): void;
+  addSingleton(token: symbol, constructor: Newable): void;
+  addConstant(token: symbol, value: any): void;
 };

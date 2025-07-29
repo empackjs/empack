@@ -17,7 +17,7 @@ import {
   inject,
   IPublisher,
   IReqHandler,
-  MEDIATOR_TOKEN,
+  TOKEN,
 } from "@empackjs/core";
 
 @Track()
@@ -26,7 +26,7 @@ export class LoginHandler
   implements IReqHandler<LoginCommand, OneOf<LoginResult, LoginError>>
 {
   constructor(
-    @inject(MEDIATOR_TOKEN.IPublisher) private _publisher: IPublisher,
+    @inject(TOKEN.IPublisher) private _publisher: IPublisher,
     @inject(UserRepository) private _userRepository: IUserRepository,
     @inject(AccessTokenSymbol)
     private _accessTokenHelper: IJwTokenHelper,

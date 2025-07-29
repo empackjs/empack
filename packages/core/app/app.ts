@@ -14,7 +14,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { Socket } from "net";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { MEDIATOR_TOKEN, MediatorPipe } from "../mediator/index";
+import { MediatorPipe } from "../mediator/index";
 import {
   EmpackExceptionMiddlewareFunction,
   EmpackMiddleware,
@@ -46,7 +46,7 @@ import { APIDOC_KEY } from "../openapi/decorator";
 import { ApiDocMetaData } from "../openapi/types";
 import { generateOpenApiSpec } from "../openapi/openapi";
 import swaggerUI from "swagger-ui-express";
-import { APP_TOKEN } from "./tokens";
+import { TOKEN } from "../token";
 
 function splitPath(path: string) {
   return path.split("/").filter(Boolean);
@@ -177,7 +177,6 @@ export class App {
   #connections: Set<Socket>;
   #exceptionHandler?: ExceptionHandler;
   #notFoundHandler?: NotFoundHandler;
-  #requestScopeObjects: Map<symbol, Newable>;
   #mediatorMap: MediatorMap = new Map();
   #eventMap: EventMap = new Map();
   #mediatorPipeLine?: {
@@ -205,7 +204,6 @@ export class App {
     this.serviceContainer = new Container({
       autobind: true,
     });
-    this.#requestScopeObjects = new Map();
     this.#server = http.createServer(this.#app);
     this.#bindLogger();
   }
@@ -216,18 +214,8 @@ export class App {
     return new App(options);
   }
 
-  addSingletonScope(token: symbol, constructor: Newable) {
+  addSingleton(token: symbol, constructor: Newable) {
     this.serviceContainer.bind(token).to(constructor).inSingletonScope();
-    return this;
-  }
-
-  addRequestScope(token: symbol, constructor: Newable) {
-    this.#requestScopeObjects.set(token, constructor);
-    return this;
-  }
-
-  addTransientScope(token: symbol, constructor: Newable) {
-    this.serviceContainer.bind(token).to(constructor).inTransientScope();
     return this;
   }
 
@@ -238,7 +226,7 @@ export class App {
 
   setDotEnv() {
     this.env = new Env();
-    this.serviceContainer.bind<IEnv>(APP_TOKEN.IEnv).toConstantValue(this.env);
+    this.serviceContainer.bind<IEnv>(TOKEN.IEnv).toConstantValue(this.env);
     return this;
   }
 
@@ -254,18 +242,14 @@ export class App {
       autobind: true,
     });
 
-    for (const [symbol, ctor] of this.#requestScopeObjects) {
-      child.bind(symbol).to(ctor).inSingletonScope();
-    }
-
     const mediator = new Mediator(
       child,
       this.#mediatorMap,
       this.#eventMap,
       this.#mediatorPipeLine,
     );
-    child.bind(MEDIATOR_TOKEN.ISender).toConstantValue(mediator);
-    child.bind(MEDIATOR_TOKEN.IPublisher).toConstantValue(mediator);
+    child.bind(TOKEN.ISender).toConstantValue(mediator);
+    child.bind(TOKEN.IPublisher).toConstantValue(mediator);
 
     return child;
   }
@@ -308,13 +292,7 @@ export class App {
         const { type, constructor, scope } = entry;
         switch (scope) {
           case "singleton":
-            this.addSingletonScope(type, constructor);
-            break;
-          case "request":
-            this.addRequestScope(type, constructor);
-            break;
-          case "transient":
-            this.addTransientScope(type, constructor);
+            this.addSingleton(type, constructor);
             break;
           case "constant":
             this.addConstant(type, constructor);
@@ -755,7 +733,7 @@ export class App {
 
   #bindLogger() {
     this.serviceContainer
-      .rebindSync<ILogger>(APP_TOKEN.ILogger)
+      .rebindSync<ILogger>(TOKEN.ILogger)
       .toConstantValue(this.logger);
   }
 

@@ -1,4 +1,3 @@
-export { MEDIATOR_TOKEN } from "./tokens";
 export type {
   IReqHandler,
   ISender,

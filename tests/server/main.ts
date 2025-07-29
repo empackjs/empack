@@ -1,7 +1,6 @@
 import path from "path";
 import { controllers, wsControllers } from "./controller";
 import { handlers } from "./application/handlers";
-import { ScopeTest, ScopeTestSymbol } from "./domain/user/user.root";
 import { JwtModule } from "./infra/jwt";
 import { App } from "@empackjs/core";
 import {
@@ -40,7 +39,6 @@ if (nodeEnv === "dev") {
 }
 app.enableAuthGuard(jwtGuard(jwtSecret));
 app.setMediator(handlers);
-app.addRequestScope(ScopeTestSymbol, ScopeTest);
 app.loadModules(
   new JwtModule(
     {

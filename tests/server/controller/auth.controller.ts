@@ -8,7 +8,7 @@ import {
   RegisterRule,
 } from "../contract/auth/register";
 import { RegisterCommand } from "../application/use-case/command/register/register.command";
-import { ScopeTest, ScopeTestSymbol } from "../domain/user/user.root";
+import { ScopeTest } from "../domain/user/user.root";
 import { UploadFile } from "../contract/auth/file";
 import { GetIdParams, GetIdQuery, GetIdRes } from "../contract/auth/getId";
 import {
@@ -20,7 +20,6 @@ import {
   FromQuery,
   Get,
   Guard,
-  inject,
   MediatedController,
   Multipart,
   Post,
@@ -40,7 +39,7 @@ const multer = createMulter(storage);
 @Guard("none")
 @Controller("/auth")
 export class AuthController extends MediatedController {
-  constructor(@inject(ScopeTestSymbol) private readonly _scopeTest: ScopeTest) {
+  constructor(private readonly _scopeTest: ScopeTest) {
     super();
   }
 

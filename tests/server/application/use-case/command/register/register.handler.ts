@@ -1,15 +1,11 @@
 import { UserRepository } from "../../../../infra/repository/user.repository";
 import { ErrorCodes } from "../../../error-codes";
-import { IUserRepository } from "../../../persistence/user.repository";
 import { RegisterCommand } from "./register.command";
 import { RegisterError, RegisterResult } from "./register.result";
-import {
-  ScopeTest,
-  ScopeTestSymbol,
-  UserRoot,
-} from "../../../../domain/user/user.root";
+import { ScopeTest, UserRoot } from "../../../../domain/user/user.root";
 import { ErrorReturn, OkReturn, OneOf, Track, uuid } from "@empackjs/utils";
 import { HandleFor, inject, IReqHandler } from "@empackjs/core";
+import { IUserRepository } from "../../../persistence/user.repository";
 
 @Track()
 @HandleFor(RegisterCommand)
@@ -18,7 +14,7 @@ export class RegisterHandler
 {
   constructor(
     @inject(UserRepository) private readonly _userRepository: IUserRepository,
-    @inject(ScopeTestSymbol) private readonly _scopeTest: ScopeTest,
+    private readonly _scopeTest: ScopeTest,
   ) {}
 
   async handle(

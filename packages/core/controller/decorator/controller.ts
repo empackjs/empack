@@ -17,7 +17,7 @@ export function Controller(
   return (target) => {
     Reflect.defineMetadata(CONTROLLER_METADATA.PATH, path, target);
     Reflect.defineMetadata(CONTROLLER_METADATA.MIDDLEWARE, middleware, target);
-    injectable()(target);
+    injectable("Transient")(target);
     const baseClass = Object.getPrototypeOf(target.prototype)?.constructor;
     if (baseClass && baseClass !== Object) {
       injectFromBase()(target);
@@ -28,7 +28,7 @@ export function Controller(
 export function WsController(path: string): ClassDecorator {
   return (target) => {
     Reflect.defineMetadata(WSCONTROLLER_METADATA.PATH, path, target);
-    injectable()(target);
+    injectable("Transient")(target);
     const baseClass = Object.getPrototypeOf(target.prototype)?.constructor;
     if (baseClass && baseClass !== Object) {
       injectFromBase()(target);

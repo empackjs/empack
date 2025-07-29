@@ -1,14 +1,16 @@
-interface UserProps {
+import { injectable } from "@empackjs/core";
+
+@injectable("request")
+export class ScopeTest {
+  index: number = 0;
+}
+
+type UserProps = {
   id: string;
   account: string;
   password: string;
   username: string;
-}
-
-export const ScopeTestSymbol = Symbol.for("scope_test");
-export class ScopeTest {
-  index: number = 0;
-}
+};
 
 export class UserRoot implements UserProps {
   id: string;

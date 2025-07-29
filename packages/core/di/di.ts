@@ -11,12 +11,8 @@ export abstract class Module {
 
   #createBinder(): BindingScope {
     return {
-      addSingletonScope: (type, ctor) =>
+      addSingleton: (type, ctor) =>
         this.#binder.push({ scope: "singleton", type, constructor: ctor }),
-      addRequestScope: (type, ctor) =>
-        this.#binder.push({ scope: "request", type, constructor: ctor }),
-      addTransientScope: (type, ctor) =>
-        this.#binder.push({ scope: "transient", type, constructor: ctor }),
       addConstant: (type, value) =>
         this.#binder.push({ scope: "constant", type, constructor: value }),
     };
