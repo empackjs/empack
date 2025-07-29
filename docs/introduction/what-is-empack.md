@@ -1,11 +1,16 @@
 # What is Empack
 
-Empack is a **lightweight**, **Nest-like** backend web framework built on top of **Express**. It aims to deliver a structured and scalable development experience while remaining simple and unobtrusive. Developers can focus on building business logic without getting bogged down by server configuration or boilerplate code.
+**Empack** is a **lightweight alternative to NestJS**, built on top of **Express** with a focus on simplicity, minimalism, and fast developer onboarding. While it offers a familiar, structured development experience like Nest, Empack deliberately avoids heavy abstractions and rigid architecture, making it ideal for small to medium-sized projects that prioritize **flexibility and productivity**.
 
-Unlike NestJS, Empack focuses on minimalism and fast setup, making it ideal for small to medium-sized projects that value simplicity and flexibility.
+Unlike NestJS, Empack embraces a **zero-friction** philosophy—helping developers focus on business logic without being constrained by the framework’s structure or boilerplate code.
 
-Empack is fully compatible with the existing Express ecosystem, allowing you to use popular Express middleware, libraries, and tools out of the box.
+Empack is fully compatible with the existing Express ecosystem, allowing seamless integration with popular Express middleware, libraries, and tools.
 
-It includes a built-in **dependency injection (DI) container** powered by [Inversify](https://github.com/inversify/InversifyJS), **route-based WebSocket support**, a **mediator pattern** implementation for CQRS, and **automatic OpenAPI documentation generation**.
+It comes with built-in features including:
 
-With **TypeScript decorators**, Empack simplifies the registration of controllers, routes, openAPI, and more. Its built-in mediator allows for clean separation of concerns and full decoupling between controllers and business logic—making CQRS and modular architecture easy to adopt.
+* A **dependency injection container** powered by [Inversify](https://github.com/inversify/InversifyJS)
+* **Route-based WebSocket support**
+* A **mediator pattern** implementation for CQRS
+* **Automatic OpenAPI documentation generation**
+
+With TypeScript decorators, Empack simplifies the registration of controllers, routes, OpenAPI metadata, and more. Its built-in mediator enables a clean separation of concerns, fully decoupling controllers from business logic—making CQRS and modular architecture straightforward to adopt.
