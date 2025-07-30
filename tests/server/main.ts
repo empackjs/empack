@@ -37,6 +37,11 @@ if (nodeEnv === "dev") {
     ],
   });
 }
+app.setMulterDefaults({
+  storage: {
+    destination: "upload_test"
+  }
+})
 app.enableAuthGuard(jwtGuard(jwtSecret));
 app.setMediator(handlers);
 app.loadModules(

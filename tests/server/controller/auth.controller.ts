@@ -14,7 +14,6 @@ import { GetIdParams, GetIdQuery, GetIdRes } from "../contract/auth/getId";
 import {
   ApiDoc,
   Controller,
-  createMulter,
   FromBody,
   FromParam,
   FromQuery,
@@ -24,16 +23,10 @@ import {
   Multipart,
   Post,
   Responses,
-  uploader,
+  UseMultipart,
 } from "@empackjs/core";
 import { matchResult, Track, validate } from "@empackjs/utils";
 import { AsyncTestMiddleware } from "../middleware";
-
-const storage: uploader.DiskStorageOptions = {
-  destination: `${process.cwd()}/tests/upload_test/`,
-};
-
-const multer = createMulter(storage);
 
 @Track()
 @Guard("none")
@@ -160,7 +153,11 @@ export class AuthController extends MediatedController {
     contentType: "multipart/form-data",
     requestBody: "auto",
   })
-  @Post("/file", multer.array("photos"))
+  @UseMultipart({
+    type: "array",
+    name: "photos",
+  })
+  @Post("/file")
   async postFile(@Multipart(["photos"]) multi: UploadFile) {
     console.log(multi);
     return Responses.OK({ title: multi.title });

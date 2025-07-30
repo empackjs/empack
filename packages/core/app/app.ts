@@ -47,6 +47,26 @@ import { ApiDocMetaData } from "../openapi/types";
 import { generateOpenApiSpec } from "../openapi/openapi";
 import swaggerUI from "swagger-ui-express";
 import { APP_TOKEN } from "../token";
+import { MulterConfig, MulterOptions } from "../multer/types";
+import { MULTER_KEY } from "../multer/decorator";
+import multer from "multer";
+
+function mergeMulterOptions(
+  base: MulterOptions | undefined,
+  override: MulterOptions | undefined,
+): MulterOptions {
+  return {
+    ...base,
+    ...override,
+    limits: {
+      ...base?.limits,
+      ...override?.limits,
+    },
+    storage: override?.storage ?? base?.storage,
+    fileFilter: override?.fileFilter ?? base?.fileFilter,
+    preservePath: override?.preservePath ?? base?.preservePath,
+  };
+}
 
 function splitPath(path: string) {
   return path.split("/").filter(Boolean);
@@ -190,6 +210,7 @@ export class App {
     metaDataFn: () => ApiDocMetaData[];
     options: OpenApiOptions;
   };
+  #multerDefaults?: MulterOptions;
   logger: ILogger;
   env!: IEnv;
   serviceContainer: Container;
@@ -434,9 +455,51 @@ export class App {
           }
         }
 
+        let multipartMiddleware: EmpackMiddleware = (_req, _res, next) => {
+          next();
+        };
+        const multerConfig: MulterConfig = Reflect.getMetadata(
+          MULTER_KEY,
+          ControllerClass.prototype,
+          route.handlerName,
+        );
+        if (multerConfig) {
+          const { storage, limits, preservePath, fileFilter } =
+            mergeMulterOptions(this.#multerDefaults, multerConfig.options);
+          const _multer = multer({
+            storage:
+              storage === "memory" || !storage
+                ? multer.memoryStorage()
+                : multer.diskStorage(storage),
+            limits,
+            preservePath,
+            fileFilter,
+          });
+
+          const type = multerConfig.type;
+          switch (type) {
+            case "none":
+              multipartMiddleware = _multer.none();
+              break;
+            case "single":
+              multipartMiddleware = _multer.single(multerConfig.name);
+              break;
+            case "array":
+              multipartMiddleware = _multer.array(
+                multerConfig.name,
+                multerConfig.maxCount,
+              );
+              break;
+            case "fields":
+              multipartMiddleware = _multer.fields(multerConfig.fields);
+              break;
+          }
+        }
+
         const middlewares = [
           guardMiddleware,
           ...classMiddleware,
+          multipartMiddleware,
           ...(route.middleware ?? []),
         ].map((m) => {
           return async (req: any, res: any, next: any) => {
@@ -590,6 +653,10 @@ export class App {
   setNotFoundHandler(handler: NotFoundHandler) {
     this.#notFoundHandler = handler;
     return this;
+  }
+
+  setMulterDefaults(options?: MulterOptions) {
+    this.#multerDefaults = options;
   }
 
   #useExceptionMiddleware: EmpackExceptionMiddlewareFunction = async (

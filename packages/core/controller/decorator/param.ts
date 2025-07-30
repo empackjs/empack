@@ -12,7 +12,7 @@ export const FromFile = createParamDecorator("file");
 export const FromFiles = createParamDecorator("files");
 export const FromCookie = createParamDecorator("cookie");
 export const FromHeader = createParamDecorator("header");
-export const Multipart = createMulterDecorator("multipart");
+export const FromMultipart = createMulterDecorator("multipart");
 
 function createMulterDecorator(source: ParamSource) {
   return function (fileNames: string[]): ParameterDecorator {
