@@ -14,12 +14,12 @@ import {
   ApiDoc,
   Controller,
   FromBody,
+  FromMultipart,
   FromParam,
   FromQuery,
   Get,
   Guard,
   MediatedController,
-  Multipart,
   Post,
   Responses,
   UseMultipart,
@@ -159,7 +159,7 @@ export class AuthController extends MediatedController {
     name: "photos",
   })
   @Post("/file")
-  async postFile(@Multipart(["photos"]) multi: UploadFile) {
+  async postFile(@FromMultipart(["photos"]) multi: UploadFile) {
     console.log(multi);
     return Responses.OK({ title: multi.title });
   }

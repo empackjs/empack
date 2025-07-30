@@ -1,8 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  EmpackExceptionMiddlewareFunction,
-  EmpackMiddlewareFunction,
-} from "../types";
 
 export interface ILogger {
   error(message: Error): void;
@@ -17,7 +13,7 @@ export interface IEnv {
 }
 
 export interface IEmpackMiddleware {
-  use(): EmpackMiddlewareFunction;
+  use(req: Request, res: Response, next: NextFunction): void | Promise<void>;
 }
 
 export interface IEmpackExceptionMiddleware {
@@ -26,5 +22,5 @@ export interface IEmpackExceptionMiddleware {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): EmpackExceptionMiddlewareFunction;
+  ): void | Promise<void>;
 }

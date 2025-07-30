@@ -1,9 +1,12 @@
 import {
-    APP_TOKEN,
+  APP_TOKEN,
   EmpackMiddlewareFunction,
   IEmpackMiddleware,
   ILogger,
   inject,
+  NextFunction,
+  Request,
+  Response,
 } from "@empackjs/core";
 
 function delay(ms: number) {
@@ -12,14 +15,11 @@ function delay(ms: number) {
 
 export class AsyncTestMiddleware implements IEmpackMiddleware {
   constructor(@inject(APP_TOKEN.ILogger) private logger: ILogger) {}
-
-  use(): EmpackMiddlewareFunction {
-    return async (_req, _res, next) => {
-      this.logger.debug("Middleware start");
-      await delay(1000);
-      this.logger.debug("Middleware end");
-      next();
-    };
+  async use(_req: Request, _res: Response, next: NextFunction): Promise<void> {
+    this.logger.debug("Middleware start");
+    await delay(1000);
+    this.logger.debug("Middleware end");
+    next();
   }
 }
 

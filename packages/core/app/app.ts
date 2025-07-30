@@ -108,11 +108,13 @@ function withWsErrorHandler<T extends (...args: any[]) => Promise<any> | any>(
   };
 }
 
-function isClassConstructor(fn: unknown): fn is NewableFunction {
-  return (
-    typeof fn === "function" &&
-    /^class\s/.test(Function.prototype.toString.call(fn))
-  );
+function isClassConstructor(fn: any): boolean {
+  try {
+    Reflect.construct(String, [], fn);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function resolveMiddleware(
@@ -131,15 +133,14 @@ async function resolveMiddleware(
     throw new Error(`Middleware ${middleware.name} is missing 'use' method.`);
   }
 
-  const resolved = instance.use();
+  const resolved = instance;
 
-  if (typeof resolved !== "function") {
+  if (typeof resolved.use !== "function") {
     throw new Error(
       `Middleware ${middleware.name}.use() did not return a function`,
     );
   }
-
-  return resolved;
+  return resolved.use.bind(instance);
 }
 
 class Env implements IEnv {
