@@ -37,12 +37,12 @@ export default defineConfig({
                 link: "/guides/controller",
               },
               {
-                text: "Middleware",
-                link: "/guides/middleware",
-              },
-              {
                 text: "DI Container",
                 link: "/guides/di-container",
+              },
+              {
+                text: "Middleware",
+                link: "/guides/middleware",
               },
               {
                 text: "Mediator",

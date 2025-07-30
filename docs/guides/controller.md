@@ -57,21 +57,25 @@ getUser(
   @FromParam() params: any, // or for all params
   @FromQuery('expand') expand?: string,
 ) {
-  const {userId, bookId} = params;
+  const { userId, bookId } = params;
   return Responses.OK({userId, bookId});
 }
 ```
 
-To handle file uploads, use `@Multipart()` on the route and `@FromFile()` or `@FromFiles()` to access the uploaded content:
+To handle file uploads, use `@UseMultipart()` on the route and `@FromFile()` or `@FromFiles()` to access the uploaded content:
 
 ```ts
-@Post("/file", multer.single("photo"))
+@UseMultipart({
+  type: "single",
+  name: "photo"
+})
+@Post("/file")
 postFile(@FromFile() photo: MulterFile) {
   return Responses.OK({ title: photo.filename });
 }
 ```
 
-## Registering Controllers in the Application
+## Registing Controllers
 
 After defining your controllers, you need to register them with the application instance to make their routes active.
 In Empack, use the `app.mapController([Controllers])` method to register one or more controllers:
