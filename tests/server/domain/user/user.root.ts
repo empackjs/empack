@@ -1,10 +1,3 @@
-import { injectable } from "@empackjs/core";
-
-@injectable("request")
-export class ScopeTest {
-  index: number = 0;
-}
-
 type UserProps = {
   id: string;
   account: string;

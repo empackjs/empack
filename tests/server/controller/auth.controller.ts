@@ -8,7 +8,6 @@ import {
   RegisterRule,
 } from "../contract/auth/register";
 import { RegisterCommand } from "../application/use-case/command/register/register.command";
-import { ScopeTest } from "../domain/user/user.root";
 import { UploadFile } from "../contract/auth/file";
 import { GetIdParams, GetIdQuery, GetIdRes } from "../contract/auth/getId";
 import {
@@ -27,12 +26,15 @@ import {
 } from "@empackjs/core";
 import { matchResult, Track, validate } from "@empackjs/utils";
 import { AsyncTestMiddleware } from "../middleware";
+import { UserService } from "../service";
 
 @Track()
 @Guard("none")
 @Controller("/auth")
 export class AuthController extends MediatedController {
-  constructor(private readonly _scopeTest: ScopeTest) {
+  constructor(
+    private _userSvc: UserService,
+  ) {
     super();
   }
 
@@ -48,9 +50,8 @@ export class AuthController extends MediatedController {
   })
   @Post("/register", validate(RegisterRule))
   async register(@FromBody() req: RegisterReq) {
-    console.log("from controller: ", this._scopeTest.index);
-    this._scopeTest.index++;
-    console.log("and add one in controller: ", this._scopeTest.index);
+    const a = this._userSvc.get()
+    console.log("Controller", a)
 
     const command = new RegisterCommand(req);
     const result = await this.dispatch(command);

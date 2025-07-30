@@ -2,10 +2,11 @@ import { UserRepository } from "../../../../infra/repository/user.repository";
 import { ErrorCodes } from "../../../error-codes";
 import { RegisterCommand } from "./register.command";
 import { RegisterError, RegisterResult } from "./register.result";
-import { ScopeTest, UserRoot } from "../../../../domain/user/user.root";
+import { UserRoot } from "../../../../domain/user/user.root";
 import { ErrorReturn, OkReturn, OneOf, Track, uuid } from "@empackjs/utils";
 import { HandleFor, inject, IReqHandler } from "@empackjs/core";
 import { IUserRepository } from "../../../persistence/user.repository";
+import { UserService } from "../../../../service";
 
 @Track()
 @HandleFor(RegisterCommand)
@@ -13,14 +14,15 @@ export class RegisterHandler
   implements IReqHandler<RegisterCommand, OneOf<RegisterResult, RegisterError>>
 {
   constructor(
-    @inject(UserRepository) private readonly _userRepository: IUserRepository,
-    private readonly _scopeTest: ScopeTest,
+    @inject(UserRepository) private _userRepository: IUserRepository,
+    private _userSvc: UserService
   ) {}
 
   async handle(
     req: RegisterCommand,
   ): Promise<OneOf<RegisterResult, RegisterError>> {
-    console.log("after mediator: ", this._scopeTest.index);
+    const b = this._userSvc.get();
+    console.log("Handler", b)
 
     const isUserExist =
       (await this._userRepository.getByAccount(req.account)) !== null;
