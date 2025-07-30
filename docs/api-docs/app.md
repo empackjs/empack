@@ -12,9 +12,7 @@ The App class is the core of the Empack framework. It is responsible for initial
 - Manage exception and 404 response handling
 - Integrate the CQRS mediator and event system
 
-## API
-
-### createBuilder(configure?: (options: AppOptions) => void)
+## createBuilder(configure?: (options: AppOptions) => void)
 
 The `createBuilder()` method is the entry point for creating an Empack application. It returns a new App instance and allows you to configure global settings before the server starts.
 
@@ -24,7 +22,7 @@ const app = App.createBuilder(opt: AppOptions => {
 })
 ```
 
-#### AppOptions
+### AppOptions
 
 The `AppOptions` object allows you to customize global application settings.
 
@@ -34,7 +32,7 @@ The `AppOptions` object allows you to customize global application settings.
 | `wsPrefix`     |`string`  |`""`         | Global prefix for all websocket routes|
 | `setTimeout`   |`number?` |`undefined`  | Custom timeout for HTTP server.       |
 
-### addSingletonScope(token: symbol, constructor: Newable)
+## addSingleton(token: symbol, constructor: Newable)
 
 Registers a dependency in singleton scope, meaning it will be created only **once** and reused across the entire application lifecycle.  
 
@@ -47,7 +45,7 @@ class LoggerService {
   }
 }
 
-app.addSingletonScope(LOGGER, LoggerService)
+app.addSingleton(LOGGER, LoggerService)
 ```
 
 Use this for services or resources that should be **shared globally**, such as:
@@ -55,7 +53,7 @@ Use this for services or resources that should be **shared globally**, such as:
 * Database connections
 * Configuration services
 
-### addConstant(token: symbol, instance: any)
+## addConstant(token: symbol, instance: any)
 
 Registers a pre-instantiated object or value into the DI container. This value will be injected **as Singleton**.
 
@@ -70,34 +68,7 @@ const config = {
 app.addConstant(CONFIG, config);
 ```
 
-### addRequestScope(token: symbol, constructor: Newable)
-
-Registers a class in request scope. A new instance will be created **for each HTTP or WebSocket request**.
-
-```ts
-app.addRequestScope(SvcSymbol, RequestIdService)
-```
-
-Use when the service should be isolated per request, such as:
-
-* Current user context
-* Request ID or trace ID
-* Per-request cache
-
-### addTransientScope(token: symbol, constructor: Newable)
-
-Registers a class in transient scope. A new instance will be created **every time** it is injected or resolved.
-
-```ts
-app.addTransientScope(HelperSymbol, UtilityService)
-```
-
-Use when the class is stateless or should not be reused:
-
-* Pure utility functions
-* One-off processors (e.g., PasswordHasher, TokenEncoder)
-
-### setDotEnv()
+## setDotEnv()
 
 Loads environment variables from `process.env` and registers an Env service into the DI container.
 Make sure to load your environment variables (e.g. using dotenv.config()) before calling `setDotEnv()`. The Env service reads from `process.env` at the time it's registered.
@@ -106,15 +77,15 @@ Make sure to load your environment variables (e.g. using dotenv.config()) before
 app.setDotEnv()
 ```
 
-After that, you can inject the Env using the `IEnvSymbol` token:
+After that, you can inject the Env using the `APP_TOKEN.IEnv`:
 
 ```ts
-constructor(@Inject(IEnvSymbol) private env: IEnv) {}
+constructor(@Inject(APP_TOKEN.IEnv) private env: IEnv) {}
 
 this.env.get("PORT");
 ```
 
-### setLogger(logger: ILogger)
+## setLogger(logger: ILogger)
 
 Replaces the default logger with your own custom implementation.
 
@@ -125,13 +96,13 @@ app.setLogger(new MyCustomLogger());
 The default logger is a **basic console-based implementation**.
 To integrate with tools like `Winston`, `Pino`, or external logging systems, pass in your own `ILogger` implementation.
 
-After that, you can inject the Logger using the `ILoggerSymbol` token:
+After that, you can inject the Logger using the `APP_TOKEN.ILogger` token:
 
 ```ts
-constructor(@Inject(ILoggerSymbol) private logger: ILogger) {}
+constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
 
 this.logger.info("hello world!")
 ```
 
 
-WIP
+## WIP

@@ -16,6 +16,9 @@ hero:
     - theme: alt
       text: Getting Started
       link: /guides/getting-started
+    - theme: alt
+      text: API Docs
+      link: /api-docs/app
 
 features:
   - title: Express-Compatible

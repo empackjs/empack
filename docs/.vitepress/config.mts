@@ -45,8 +45,20 @@ export default defineConfig({
                 link: "/guides/middleware",
               },
               {
+                text: "Guard",
+                link: "/guides/guard",
+              },
+              {
+                text: "Multer",
+                link: "/guides/multer",
+              },
+              {
                 text: "Mediator",
                 link: "/guides/mediator",
+              },
+              {
+                text: "WebSocket",
+                link: "/guides/websocket",
               },
               {
                 text: "OpenAPI",
@@ -54,6 +66,15 @@ export default defineConfig({
               },
             ],
           },
+          {
+            text: "API Docs",
+            items: [
+              {
+                text: "App",
+                link: "/api-docs/app"
+              }
+            ]
+          }
         ],
         socialLinks: [
           { icon: "github", link: "https://github.com/empackjs/empack" },
