@@ -36,19 +36,19 @@ Empack currently supports:
 Empack provides a rich set of **parameter decorators** that allow you to easily extract data from various parts of the HTTP request.
 These decorators can be used in controller methods to access request body, query params, headers, cookies, uploaded files, and more.
 
-| Decorator       | Description                                     |
-| --------------- | ----------------------------------------------- |
-| `@FromBody()`   | Gets the request body (`req.body`)              |
-| `@FromQuery()`  | Gets a query parameter (`req.query`)            |
-| `@FromParam()`  | Gets a route parameter (`req.params`)           |
-| `@FromLocals()` | Gets a value from `res.locals`                  |
-| `@FromReq()`    | Gets the raw Express `Request` object           |
-| `@FromRes()`    | Gets the raw Express `Response` object          |
-| `@FromFile()`   | Gets a single uploaded file (`req.file`)        |
-| `@FromFiles()`  | Gets multiple uploaded files (`req.files`)      |
-| `@FromCookie()` | Gets a cookie value (`req.cookies`)             |
-| `@FromHeader()` | Gets a specific header (`req.headers`)          |
-| `@Multipart()`  | WIP                                             |
+| Decorator           | Description                                     |
+| --------------------| ----------------------------------------------- |
+| `@FromBody()`       | Gets the request body (`req.body`)              |
+| `@FromQuery()`      | Gets a query parameter (`req.query`)            |
+| `@FromParam()`      | Gets a route parameter (`req.params`)           |
+| `@FromLocals()`     | Gets a value from `res.locals`                  |
+| `@FromReq()`        | Gets the raw Express `Request` object           |
+| `@FromRes()`        | Gets the raw Express `Response` object          |
+| `@FromFile()`       | Gets a single uploaded file (`req.file`)        |
+| `@FromFiles()`      | Gets multiple uploaded files (`req.files`)      |
+| `@FromCookie()`     | Gets a cookie value (`req.cookies`)             |
+| `@FromHeader()`     | Gets a specific header (`req.headers`)          |
+| `@FromMultipart()`  | WIP                                             |
 
 ```ts
 @Get('/user/:userId/book/:bookId')
@@ -75,10 +75,10 @@ postFile(@FromFile() photo: MulterFile) {
 }
 ```
 
-## Registing Controllers
+## Registering Controllers
 
 After defining your controllers, you need to register them with the application instance to make their routes active.
-In Empack, use the `app.mapController([Controllers])` method to register one or more controllers:
+In Empack, use the `app.mapController([Controllers])` method to register controllers:
 
 ```ts
 import { App } from '@empackjs/core';

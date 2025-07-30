@@ -5,7 +5,6 @@ Empack middleware works similarly to Express middleware but with support for:
 * Class-based middleware with full Dependency Injection (DI)
 * Route-level、controller-level and app-level middleware
 * request-scoped dependencies
-* Built-in support for guards and file uploads
 
 ## Middleware Types
 
@@ -24,11 +23,11 @@ app.useMiddleware(loggerMiddleware);
 
 This style is mostly used for global middleware, such as CORS, parsers, static serving, etc.
 
-### Class-style middleware (with DI)
+### 2. Class-style middleware (with DI)
 
 ```ts
-export class LoggerMiddleware implements EmpackMiddleware {
-  construct(private logger: Logger) {}
+export class LoggerMiddleware implements IEmpackMiddleware {
+  constructor(private logger: Logger) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     this.logger.log(`[${req.method}] ${req.url}`);
@@ -86,6 +85,8 @@ Here’s a typical middleware execution flow:
 
 ```
 [Global App Middleware]
+        ↓
+[Guard Middleware(if any)]
         ↓
 [Controller Middleware]
         ↓
