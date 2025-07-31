@@ -17,10 +17,20 @@ In this section, we’ll cover the remaining features of the App class in Empack
 
 Loads `.env` variables and registers them into the DI container as an `IEnv` service:
 
+> [!NOTE]
+`setDotEnv()` simply wraps `process.env` and exposes it via `IEnv`.
+It does not automatically parse `.env` files.
+You should manually load your environment variables using a library like `dotenv` before calling `.setDotEnv()`:
+
 ```ts
+//main.ts
+import dotenv from "dotenv";
+dotenv.config({ path: "./config/.env.local" });
+
 App.createBuilder()
   .setDotEnv()
 
+//my.controller.ts
 @Controller("/")
 class MyController {
   constructor(@inject(APP_TOKEN.IEnv) private env: IEnv) {}
