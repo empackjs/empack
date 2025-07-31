@@ -48,7 +48,7 @@ These decorators can be used in controller methods to access request body, query
 | `@FromFiles()`      | Gets multiple uploaded files (`req.files`)      |
 | `@FromCookie()`     | Gets a cookie value (`req.cookies`)             |
 | `@FromHeader()`     | Gets a specific header (`req.headers`)          |
-| `@FromMultipart()`  | WIP                                             |
+| `@FromMultipart()`  | See section [Multer](/guides/multer.html#about-usemultipart-and-frommultipart)|
 
 ```ts
 @Get('/user/:userId/book/:bookId')

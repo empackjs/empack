@@ -80,3 +80,47 @@ If a route is decorated with `@UseMultipart(...)`, its options will override the
 >[!TIP]
 Global defaults are ideal for consistent config (e.g. always use memory storage),
 while per-route overrides give you flexibility when needed.
+
+## About `@UseMultipart()` and `@FromMultipart()`
+
+The `@UseMultipart()` decorator configures the Multer middleware for parsing `multipart/form-data` in a route.
+
+The `@FromMultipart()` decorator then allows you to inject a combined object that includes:
+
+* All text fields (`req.body`)
+* The uploaded files specified in `@UseMultipart()`, merged by their field names
+
+>[!NOTE]
+This means `@FromMultipart()` gives you a complete view of both form fields and uploaded files in one object.
+
+### Example
+
+```ts
+@Post("/profile")
+@UseMultipart({
+  type: "fields",
+  fields: [
+    { name: "avatar", maxCount: 1 },
+    { name: "documents", maxCount: 3 },
+  ],
+})
+updateProfile(
+  @FromMultipart() body: {
+    username: string;
+    avatar?: MulterFile[]; // For 'fields' type, even maxCount=1, this is still an array.
+    documents?: MulterFile[];
+  },
+) {
+  return Responses.OK(body);
+}
+```
+
+This will result in an injected object like:
+
+```json
+{
+  username: "Alice",
+  avatar: { originalname: "pic.png", ... },
+  documents: [{ originalname: "doc1.pdf", ... }, { originalname: "doc2.pdf", ... }]
+}
+```
