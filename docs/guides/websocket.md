@@ -35,7 +35,6 @@ Use `@WsController(path)` to define a WebSocket endpoint:
 
 ```ts
 @WsController("/ws/chat/:roomId")
-@injectable("request")
 export class ChatGateway implements IWebSocket {
   onConnected(ctx: WebSocketContext) {
     // this will try to get query value `/ws/chat/:roomId?token=value`
