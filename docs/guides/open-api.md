@@ -28,8 +28,8 @@ Use `@ApiDoc()` to define metadata for a specific route handler.
   tags: ["Auth"],
   requestBody: "auto",
   responses: {
-    201: { description: "Success", content: RegisterRes },
-    409: { description: "Conflict", content: ErrorBody },
+    [Status.OK]: { description: "Success", content: RegisterRes }, // use Status enum
+    409: { description: "Conflict", content: ErrorBody }, // or simply use status codes
   },
 })
 @Post("/register")

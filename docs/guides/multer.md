@@ -56,7 +56,7 @@ uploadForm(
 ```ts
 @Post("/text")
 @UseMultipart({ type: "none" })
-handleTextOnly(req, res) {
+handleTextOnly() {
   return Responses.OK("No file expected.");
 }
 ```

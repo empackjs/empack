@@ -64,17 +64,12 @@ export default defineConfig({
                 text: "OpenAPI",
                 link: "/guides/open-api",
               },
-            ],
-          },
-          {
-            text: "API Docs",
-            items: [
               {
                 text: "App",
-                link: "/api-docs/app"
-              }
-            ]
-          }
+                link: "/guides/app",
+              },
+            ],
+          },
         ],
         socialLinks: [
           { icon: "github", link: "https://github.com/empackjs/empack" },
