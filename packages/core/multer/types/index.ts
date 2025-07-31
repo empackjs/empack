@@ -1,19 +1,7 @@
 import { DiskStorageOptions, FileFilterCallback } from "multer";
-import { Readable } from "node:stream";
 import { Request } from "express";
 
-export type MulterFile = {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  size: number;
-  stream: Readable;
-  destination: string;
-  filename: string;
-  path: string;
-  buffer: Buffer;
-};
+export type MulterFile = Express.Multer.File;
 
 export type MulterOptions = {
   storage?: DiskStorageOptions | "memory";
