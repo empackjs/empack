@@ -51,8 +51,8 @@ You can skip guard checks by marking routes or controllers with:
 ```ts
 @Guard("none")
 @Get("/public")
-getPublic(req, res) {
-  res.send("Anyone can access this.");
+getPublic() {
+  return Responses.OK("Anyone can access this.");
 }
 ```
 
@@ -68,14 +68,14 @@ You can override the default guard at the **controller** or **route** level:
 @Controller("/admin")
 export class AdminController {
   @Get("/")
-  getDashboard(req, res) {
-    res.send("Admin Only");
+  getDashboard() {
+    return Responses.OK("Admin Only");
   }
 
   @Guard("none")
   @Get("/status")
-  getStatus(req, res) {
-    res.send("Public route inside AdminController");
+  getStatus() {
+    return Responses.OK("Public route inside AdminController");
   }
 }
 ```

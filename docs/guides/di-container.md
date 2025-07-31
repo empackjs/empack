@@ -145,8 +145,8 @@ export class PostController {
   constructor(private currentUser: CurrentUser) {}
 
   @Get("/")
-  getAll(req, res) {
-    return res.json({ userId: this.currentUser.id });
+  getAll() {
+    return Responses.OK({ userId: this.currentUser.id });
   }
 }
 ```

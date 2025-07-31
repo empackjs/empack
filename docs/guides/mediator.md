@@ -46,7 +46,7 @@ export class AuthController extends MediatedController {
   async register(@FromBody() body: RegisterReq) {
     const command = new RegisterCommand(body);
     const result = await this.dispatch(command);
-    //...
+    ...
   }
 }
 ```
