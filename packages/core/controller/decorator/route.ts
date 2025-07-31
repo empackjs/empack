@@ -97,13 +97,7 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
                   } else if (req.file?.fieldname === name) {
                     value = req.file;
                   }
-
-                  if (value !== undefined) {
-                    rawValue[name] =
-                      Array.isArray(value) && value.length === 1
-                        ? value[0]
-                        : value;
-                  }
+                  rawValue[name] = value;
                 });
 
                 break;
