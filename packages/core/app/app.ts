@@ -181,6 +181,7 @@ export class AppOptions {
   routerPrefix: string = "/api";
   wsPrefix: string = "";
   setTimeout?: number;
+  gracefulShutdownTimeout?: number;
 }
 
 export class WsOptions {
@@ -771,8 +772,12 @@ export class App {
       }
     }
 
-    this.useMiddleware(this.#useExceptionMiddleware);
-    this.useMiddleware(this.#useNotFoundMiddleware);
+    if (this.#exceptionHandler) {
+      this.useMiddleware(this.#useExceptionMiddleware);
+    }
+    if (this.#notFoundHandler) {
+      this.useMiddleware(this.#useNotFoundMiddleware);
+    }
 
     this.#server.listen(port, () => {
       this.logger.info(`Listening on port ${port}`);
@@ -810,6 +815,6 @@ export class App {
     setTimeout(() => {
       this.logger.info("Forcing close of connections...");
       this.#connections.forEach((conn) => conn.destroy());
-    }, 30_000);
+    }, this.options.gracefulShutdownTimeout ?? 30_000);
   }
 }
