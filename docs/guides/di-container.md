@@ -12,6 +12,9 @@ Empack uses [InversifyJS](https://github.com/inversify/InversifyJS) as its Depen
 Empack initializes an internal global container during app creation. You can register services as follows:
 
 ```ts
+const LOGGER_TOKEN = Symbol("logger")
+const CONFIG_TOKEN = Symbol("config")
+
 const app = App.createBuilder()
   .addSingleton(LOGGER_TOKEN, Logger)
   .addConstant(CONFIG_TOKEN, configObject);
