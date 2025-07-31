@@ -1,38 +1,42 @@
 # Empack
 
-An Express-based web server framework.
+A lightweight, Express-based web server framework.
 
 ## Description
 
-**Empack** is a **lightweight alternative to NestJS**, built on top of **Express** with a focus on simplicity, minimalism, and fast developer onboarding. While it offers a familiar, structured development experience like Nest, Empack deliberately avoids heavy abstractions and rigid architecture, making it ideal for small to medium-sized projects that prioritize **flexibility and productivity**.
+**Empack** is a modern alternative to NestJS, designed for developers who want structure and productivity without the overhead of complex abstractions.
 
-Unlike NestJS, Empack embraces a **zero-friction** philosophy—helping developers focus on business logic without being constrained by the framework’s structure or boilerplate code.
+Built on top of Express, Empack provides a familiar development model with TypeScript decorators, dependency injection, and built-in support for WebSocket routing and CQRS — while maintaining minimalism and full control.
 
-Empack is fully compatible with the existing Express ecosystem, allowing seamless integration with popular Express middleware, libraries, and tools.
+Unlike NestJS, Empack focuses on **zero-friction development**, helping you stay close to business logic without being tied to rigid module systems or extensive boilerplate.
 
-It comes with built-in features including:
+Empack is fully compatible with the Express ecosystem, so you can use your favorite middleware, libraries, and tools without modification.
 
-* A dependency injection container powered by [Inversify](https://github.com/inversify/InversifyJS)
-* Route-based WebSocket support
-* A mediator pattern implementation for CQRS
-* Automatic OpenAPI documentation generation
+### ✨ Key Features
 
-With TypeScript decorators, Empack simplifies the registration of controllers, routes, OpenAPI metadata, and more. Its built-in mediator enables a clean separation of concerns, fully decoupling controllers from business logic—making CQRS and modular architecture straightforward to adopt.
+- ⚡ A DI container powered by Inversify (supports `singleton`, `transient`, and `request-scope`)
+- 🔌 Middleware and controller injection with shared request container
+- 📡 Route-based WebSocket controller support with per-connection DI
+- 🧩 CQRS via built-in Mediator pattern (with `@HandleFor()` decorators)
+- 📃 Automatic OpenAPI generation from decorators
+- 🧱 Minimal abstractions — no modules, no lifecycle complexity
 
-## Empack vs NestJS: Key Differences
+---
 
-| Feature / Design Aspect  | **Empack**                                                                 | **NestJS**                                                                   |
-| ------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 🧱 Base Architecture     | Built directly on Express (thin abstraction)                               | Built on Express or Fastify with heavy abstraction                           |
-| 💉 Dependency Injection  | Custom DI container with **singleton / transient / request-scope** support | Built-in DI, request-scope is limited and not supported in middleware        |
-| ⚙️ Middleware Injection  | Middleware shares the same request container as controllers                | Middleware is singleton and cannot inject request-scoped providers           |
-| 📡 WebSocket Routing     | Path-based routing, per-connection container, DI and auth supported        | Centralized Gateway (singleton), namespace-based only                        |
-| 📦 Module System         | No module requirement; everything can be wired via DI                      | Everything must be registered inside a `@Module()`                           |
+## 🔍 Empack vs NestJS: Key Differences
 
-Empack aims to be the sweet spot between Express's flexibility and NestJS's structure — without the ceremony. It gives you:
+| Feature / Design Aspect        | **Empack**                                                            | **NestJS**                                                               |
+|-------------------------------|------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| 🧱 Base Architecture           | Built directly on Express (thin abstraction)                          | Built on Express or Fastify with heavy abstraction                        |
+| 💉 Dependency Injection        | Custom DI with `singleton`, `transient`, and `request-scope`          | Built-in DI, limited request-scope, not supported in middleware           |
+| ⚙️ Middleware Injection        | Middleware shares the request container with controllers               | Middleware is singleton; request-scoped injection not supported           |
+| 📡 WebSocket Routing           | Path-based, DI + auth per connection                                  | Centralized gateway (singleton), namespace-based routing                  |
+| 📦 Module System               | No modules — all components wired via DI                              | Requires all providers/controllers to be registered in `@Module()`        |
 
-* Modern DI with request-scoped injection
-* Lazy middleware resolution
-* Path-based WebSocket routing with full per-request context
-* Minimal but powerful decorators
-* Zero need to register modules, or fight the framework
+**Empack** aims to strike a balance between Express's flexibility and NestJS's structure — offering:
+
+- Request-scoped DI everywhere (controllers, middleware, WebSocket)
+- Lazy middleware resolution
+- Zero module registration
+- Minimal but powerful decorators
+- Seamless integration with existing Express middleware and tools
