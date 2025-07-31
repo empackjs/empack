@@ -103,6 +103,18 @@ export class PostService {
 }
 ```
 
+### No need to mark Controllers or Handlers
+
+Empack automatically treats the following classes as transient-scoped, meaning they are resolved fresh for each request or event:
+
+* `@Controller()` – for HTTP routes
+* `@HandleFor()` – for mediator CQRS handlers
+* `@Subscribe()` – for mediator Event handlers
+* `@WsController()` – for WebSocket route controllers
+
+No need to manually annotate them with `@injectable()`.
+This makes request-level isolation the default for all entry points, with no extra ceremony.
+
 ## Pre-registered Tokens in Empack
 
 Empack provides several built-in tokens you can override or extend:

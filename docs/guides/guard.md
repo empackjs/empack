@@ -1,6 +1,6 @@
-# Guards
+# Guard
 
-Guards in Empack are specialized middleware designed for **authentication**, **authorization**, or any **access control logic**.
+Guard in Empack are specialized middleware designed for **authentication**, **authorization**, or any **access control logic**.
 They are fully integrated with the DI container and can be applied globally, per-controller, or per-route.
 
 ## What is a Guard?
@@ -15,7 +15,6 @@ Common use cases include:
 Since guards can be a class-based middleware, they support full Dependency Injection.
 
 ```ts
-@injectable("request")
 export class JwtGuard implements GuardMiddleware {
   constructor(private user: CurrentUser) {}
 
