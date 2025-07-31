@@ -8,9 +8,9 @@ Empack is fully compatible with the existing Express ecosystem, allowing seamles
 
 It comes with built-in features including:
 
-* A **dependency injection container** powered by [Inversify](https://github.com/inversify/InversifyJS)
-* **Route-based WebSocket support**
-* A **mediator pattern** implementation for CQRS
-* **Automatic OpenAPI documentation generation**
+* A dependency injection container powered by [Inversify](https://github.com/inversify/InversifyJS)
+* Route-based WebSocket support
+* A mediator pattern implementation for CQRS
+* Automatic OpenAPI documentation generation
 
 With TypeScript decorators, Empack simplifies the registration of controllers, routes, OpenAPI metadata, and more. Its built-in mediator enables a clean separation of concerns, fully decoupling controllers from business logic—making CQRS and modular architecture straightforward to adopt.
