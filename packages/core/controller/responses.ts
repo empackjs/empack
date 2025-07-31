@@ -82,29 +82,32 @@ export class Responses {
     return new JsonResponse(204, null);
   }
 
-  static BadRequest<T = any>(error: T) {
-    return new JsonResponse(400, error);
-  }
+  static ClientError = {
+    BadRequest: <T = any>(err: T) => new JsonResponse(400, err),
+    Unauthorized: <T = any>(err: T) => new JsonResponse(401, err),
+    Forbidden: <T = any>(err: T) => new JsonResponse(403, err),
+    NotFound: <T = any>(err: T) => new JsonResponse(404, err),
+    MethodNotAllowed: <T = any>(err: T) => new JsonResponse(405, err),
+    Conflict: <T = any>(err: T) => new JsonResponse(409, err),
+    UnsupportedMediaType: <T = any>(err: T) => new JsonResponse(415, err),
+    TooManyRequests: <T = any>(err: T) => new JsonResponse(429, err),
+  };
 
-  static Unauthorized<T = any>(error: T) {
-    return new JsonResponse(401, error);
-  }
+  static ServerError = {
+    Internal: <T = any>(err: T) => new JsonResponse(500, err),
+    NotImplemented: <T = any>(err: T) => new JsonResponse(501, err),
+    BadGateway: <T = any>(err: T) => new JsonResponse(502, err),
+    ServiceUnavailable: <T = any>(err: T) => new JsonResponse(503, err),
+    GatewayTimeout: <T = any>(err: T) => new JsonResponse(504, err),
+  };
 
-  static Forbidden<T = any>(error: T) {
-    return new JsonResponse(403, error);
-  }
-
-  static NotFound<T = any>(error: T) {
-    return new JsonResponse(404, error);
-  }
-
-  static Conflict<T = any>(error: T) {
-    return new JsonResponse(409, error);
-  }
-
-  static Redirect(url: string) {
-    return new RedirectResponse(url, 302);
-  }
+  static Redirect = {
+    MovedPermanently: (url: string) => new RedirectResponse(url, 301),
+    Found: (url: string) => new RedirectResponse(url, 302),
+    SeeOther: (url: string) => new RedirectResponse(url, 303),
+    TemporaryRedirect: (url: string) => new RedirectResponse(url, 307),
+    PermanentRedirect: (url: string) => new RedirectResponse(url, 308),
+  };
 
   static File(fileName: string, filePath: string) {
     return new FileResponse(fileName, filePath);

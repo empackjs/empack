@@ -22,6 +22,7 @@ import {
   MediatedController,
   Post,
   Responses,
+  Status,
   UseMultipart,
 } from "@empackjs/core";
 import { matchResult, Track, validate } from "@empackjs/utils";
@@ -32,9 +33,7 @@ import { UserService } from "../service";
 @Guard("none")
 @Controller("/auth")
 export class AuthController extends MediatedController {
-  constructor(
-    private _userSvc: UserService,
-  ) {
+  constructor(private _userSvc: UserService) {
     super();
   }
 
@@ -44,14 +43,14 @@ export class AuthController extends MediatedController {
     tags: ["Auth"],
     requestBody: "auto",
     responses: {
-      201: { description: "回傳內容", content: RegisterRes },
-      409: { description: "錯誤訊息", content: ErrorBody },
+      [Status.OK]: { description: "回傳內容", content: RegisterRes },
+      [Status.Conflict]: { description: "錯誤訊息", content: ErrorBody },
     },
   })
   @Post("/register", validate(RegisterRule))
   async register(@FromBody() req: RegisterReq) {
-    const a = this._userSvc.get()
-    console.log("Controller", a)
+    const a = this._userSvc.get();
+    console.log("Controller", a);
 
     const command = new RegisterCommand(req);
     const result = await this.dispatch(command);
@@ -64,7 +63,7 @@ export class AuthController extends MediatedController {
       },
       err: {
         [ErrorCodes.USER_ALREADY_EXISTS]: (e) => {
-          return Responses.Conflict<ErrorBody>({
+          return Responses.ClientError.Conflict<ErrorBody>({
             errorCode: e,
           });
         },
@@ -97,7 +96,7 @@ export class AuthController extends MediatedController {
       },
       err: {
         [ErrorCodes.ACCOUNT_OR_PASSWORD_INCORRECT]: (e) => {
-          return Responses.Unauthorized<ErrorBody>({
+          return Responses.ClientError.Unauthorized<ErrorBody>({
             errorCode: e,
           });
         },
