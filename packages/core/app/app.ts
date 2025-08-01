@@ -1,12 +1,3 @@
-import express, {
-  Router,
-  NextFunction,
-  Request,
-  Response,
-  RequestHandler,
-  ErrorRequestHandler,
-  Application,
-} from "express";
 import "reflect-metadata";
 import { Container, Newable } from "inversify";
 import http, { IncomingMessage } from "http";
@@ -16,11 +7,8 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { MediatorPipe } from "../mediator/index";
 import {
-  EmpackExceptionMiddlewareFunction,
   EmpackMiddleware,
   EmpackMiddlewareFunction,
-  ExceptionHandler,
-  NotFoundHandler,
   OpenApiOptions,
   WsAuthResult,
 } from "./types/index";
@@ -47,9 +35,19 @@ import { ApiDocMetaData } from "../openapi/types";
 import { generateOpenApiSpec } from "../openapi/openapi";
 import swaggerUI from "swagger-ui-express";
 import { APP_TOKEN } from "../token";
-import { MulterConfig, MulterOptions } from "../multer/types";
+import { MulterOptions } from "../multer/types";
 import { MULTER_KEY } from "../multer/decorator";
 import multer from "multer";
+import fastify, { FastifyInstance } from "fastify";
+import cookie from "@fastify/cookie";
+import fastifyStatic from "@fastify/static";
+import multipart, { MultipartFile } from "@fastify/multipart";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    container: Container;
+  }
+}
 
 function mergeMulterOptions(
   base: MulterOptions | undefined,
@@ -62,9 +60,6 @@ function mergeMulterOptions(
       ...base?.limits,
       ...override?.limits,
     },
-    storage: override?.storage ?? base?.storage,
-    fileFilter: override?.fileFilter ?? base?.fileFilter,
-    preservePath: override?.preservePath ?? base?.preservePath,
   };
 }
 
@@ -194,11 +189,9 @@ export class WsOptions {
 }
 
 export class App {
-  #app: express.Application;
-  #server: http.Server;
+  #app: FastifyInstance;
+  // #server: http.Server;
   #connections: Set<Socket>;
-  #exceptionHandler?: ExceptionHandler;
-  #notFoundHandler?: NotFoundHandler;
   #mediatorMap: MediatorMap = new Map();
   #eventMap: EventMap = new Map();
   #mediatorPipeLine?: {
@@ -220,14 +213,14 @@ export class App {
 
   private constructor(options: AppOptions) {
     this.options = options;
-    this.#app = express();
+    this.#app = fastify().register(cookie);
     this.#isAuthGuardEnabled = false;
     this.#connections = new Set<Socket>();
     this.logger = new Logger();
     this.serviceContainer = new Container({
       autobind: true,
     });
-    this.#server = http.createServer(this.#app);
+    // this.#server = http.createServer(this.#app);
     this.#bindLogger();
   }
 
@@ -401,308 +394,214 @@ export class App {
 
   mapController(controllers: Newable<any>[]) {
     this.#controllers = controllers;
-    const REQUEST_CONTAINER = Symbol("empack:RequestContainer");
 
-    const createRequestScopeContainer: EmpackMiddlewareFunction = (
-      req: any,
-      _res,
-      next,
-    ) => {
-      req[REQUEST_CONTAINER] = this.#createRequestContainer();
-      next();
-    };
+    this.#app.addHook("preHandler", async (req) => {
+      req.container = this.#createRequestContainer();
+    });
 
-    controllers.forEach((ControllerClass) => {
+    for (const c of controllers) {
       const controllerPath: string = Reflect.getMetadata(
         CONTROLLER_METADATA.PATH,
-        ControllerClass,
+        c,
       );
 
       if (!controllerPath) {
         throw new Error(
-          `Controller ${ControllerClass.name} is missing @Controller decorator`,
+          `Controller ${c.name} is missing @Controller decorator`,
         );
       }
 
       const classMiddleware: EmpackMiddleware[] =
-        Reflect.getMetadata(CONTROLLER_METADATA.MIDDLEWARE, ControllerClass) ||
-        [];
+        Reflect.getMetadata(CONTROLLER_METADATA.MIDDLEWARE, c) || [];
 
       const routes: RouteDefinition[] =
-        Reflect.getMetadata(ROUTE_METADATA_KEY, ControllerClass) || [];
+        Reflect.getMetadata(ROUTE_METADATA_KEY, c) || [];
 
-      const router = Router({ mergeParams: true });
-
-      router.use(createRequestScopeContainer);
-      for (const route of routes) {
-        let guardMiddleware: EmpackMiddleware = (_req, _res, next) => {
-          next();
-        };
-        if (this.#isAuthGuardEnabled) {
-          const methodGuard = Reflect.getMetadata(
-            GUARD_KEY,
-            ControllerClass.prototype,
-            route.handlerName,
-          );
-          const classGuard = Reflect.getMetadata(GUARD_KEY, ControllerClass);
-          const guard: GuardMiddleware =
-            methodGuard ?? classGuard ?? this.#defaultGuard;
-          if (!guard) {
-            throw new Error(
-              `AuthGuard is enabled, without default guard ${ControllerClass.name} or ${ControllerClass.name}.${route.handlerName} must define a @Guard decorator`,
-            );
-          }
-          if (guard !== "none") {
-            guardMiddleware = guard;
-          }
-        }
-
-        let multipartMiddleware: EmpackMiddleware = (_req, _res, next) => {
-          next();
-        };
-        const multerConfig: MulterConfig = Reflect.getMetadata(
-          MULTER_KEY,
-          ControllerClass.prototype,
-          route.handlerName,
-        );
-        if (multerConfig) {
-          const { storage, limits, preservePath, fileFilter } =
-            mergeMulterOptions(this.#multerDefaults, multerConfig.options);
-          const _multer = multer({
-            storage:
-              storage === "memory" || !storage
-                ? multer.memoryStorage()
-                : multer.diskStorage(storage),
-            limits,
-            preservePath,
-            fileFilter,
-          });
-
-          const type = multerConfig.type;
-          switch (type) {
-            case "none":
-              multipartMiddleware = _multer.none();
-              break;
-            case "single":
-              multipartMiddleware = _multer.single(multerConfig.name);
-              break;
-            case "array":
-              multipartMiddleware = _multer.array(
-                multerConfig.name,
-                multerConfig.maxCount,
+      const controllerPlugin = async (app: FastifyInstance) => {
+        for (const route of routes) {
+          const routePlugin = async (app: FastifyInstance) => {
+            if (this.#isAuthGuardEnabled) {
+              const methodGuard = Reflect.getMetadata(
+                GUARD_KEY,
+                c.prototype,
+                route.handlerName,
               );
-              break;
-            case "fields":
-              multipartMiddleware = _multer.fields(multerConfig.fields);
-              break;
-          }
-        }
-
-        const middlewares = [
-          guardMiddleware,
-          ...classMiddleware,
-          multipartMiddleware,
-          ...(route.middleware ?? []),
-        ].map((m) => {
-          return async (req: any, res: any, next: any) => {
-            try {
-              const fn = await resolveMiddleware(req[REQUEST_CONTAINER], m);
-              await fn(req, res, next);
-            } catch (err) {
-              next(err);
+              const classGuard = Reflect.getMetadata(GUARD_KEY, c);
+              const guard: GuardMiddleware =
+                methodGuard ?? classGuard ?? this.#defaultGuard;
+              if (!guard) {
+                throw new Error(
+                  `AuthGuard is enabled, without default guard ${c.name} or ${c.name}.${route.handlerName} must define a @Guard decorator`,
+                );
+              }
+              if (guard !== "none") {
+                app.addHook("preHandler", async (req, reply) => {
+                  return (await resolveMiddleware(req.container, guard))(
+                    req,
+                    reply,
+                  );
+                });
+              }
             }
+
+            const routeMulterOptions: MulterOptions = Reflect.getMetadata(
+              MULTER_KEY,
+              c.prototype,
+              route.handlerName,
+            );
+            if (routeMulterOptions) {
+              const { limits } = mergeMulterOptions(
+                this.#multerDefaults,
+                routeMulterOptions,
+              );
+              app.register(multipart, {
+                attachFieldsToBody: true,
+                limits,
+                onFile: () => {},
+              });
+            }
+
+            app.addHook("preHandler", async (req, reply) => {
+              for (const m of [...classMiddleware, ...route.middleware]) {
+                return (await resolveMiddleware(req.container, m))(req, reply);
+              }
+            });
+
+            app[route.method](route.path, async (req, reply) => {
+              const instance = await req.container.getAsync(c);
+              await instance[route.handlerName](req, reply);
+            });
           };
-        });
-
-        const handler = async (req: any, res: Response, next: NextFunction) => {
-          try {
-            const instance =
-              await req[REQUEST_CONTAINER].getAsync(ControllerClass);
-            await instance[route.handlerName](req, res, next);
-          } catch (err) {
-            next(err);
-          }
-        };
-
-        router[route.method](route.path, ...middlewares, handler);
-      }
+          app.register(routePlugin);
+        }
+      };
 
       const prefix = this.options.routerPrefix?.replace(/\/+$/, "") ?? "";
       const fullMountPath = `${prefix}/${controllerPath}`
         .replace(/\/+/g, "/")
         .toLowerCase();
 
-      this.logger.debug(`${ControllerClass.name} Mounted at ${fullMountPath}`);
-      this.#app.use(fullMountPath, router);
-    });
-
-    return this;
-  }
-
-  enableWebSocket(
-    controllers: Newable<IWebSocket>[],
-    fn?: (opt: WsOptions) => void,
-  ) {
-    const wsMap = new Map<
-      string,
-      { controller: Newable<IWebSocket>; matcher: any }
-    >();
-    for (const c of controllers) {
-      const path = Reflect.getMetadata(WSCONTROLLER_METADATA.PATH, c);
-      if (!path)
-        throw new Error(`${c.name} is missing @WsController Decorator`);
-      wsMap.set(path, { controller: c, matcher: match(path) });
+      this.#app.register(controllerPlugin, { prefix: fullMountPath });
+      this.logger.debug(`${c.name} Mounted at ${fullMountPath}`);
     }
 
-    const options = new WsOptions();
-    if (fn) fn(options);
-
-    const wss = new WebSocketServer({ server: this.#server });
-
-    const errorHandler = async (
-      err: any,
-      ws: WebSocket,
-      req: IncomingMessage,
-    ) => {
-      this.logger.error(err);
-      if (options.onError) await options.onError(err, ws, req);
-      if (ws.readyState === WebSocket.OPEN)
-        ws.close(1011, "Internal Server Error");
-    };
-
-    wss.on("connection", (ws, req) => {
-      ws.on("error", (err) => {
-        this.logger.error(err);
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1011, "Internal Server Error");
-        }
-      });
-
-      const handleConnection = async () => {
-        const { pathname, searchParams } = new URL(req.url!, `ws://localhost`);
-        const auth = options.authHandler
-          ? await options.authHandler(req)
-          : true;
-        if (auth !== true) {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.close(auth.code, auth.reason);
-          }
-          return;
-        }
-
-        let ctor: Newable<IWebSocket> | undefined;
-        let pathParams: any;
-        for (const [, { controller, matcher }] of wsMap) {
-          const result = matcher(pathname.toLowerCase());
-          if (result) {
-            ctor = controller;
-            pathParams = result.params;
-            break;
-          }
-        }
-        if (!ctor) {
-          this.logger.warn(`No WS route matched: ${pathname}`);
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.close(1008, "Invalid WebSocket Route");
-          }
-          return;
-        }
-        const instance = await this.#createRequestContainer().getAsync(ctor);
-        const { onMessage, onClose, onConnected } = instance;
-        const ctx: WebSocketContext = {
-          req,
-          pathParams,
-          queryParams: searchParams,
-          send: (data) => ws.send(data),
-          close: (code, reason) => ws.close(code, reason),
-        };
-        if (onConnected) {
-          withWsErrorHandler(onConnected.bind(instance, ctx), (err) =>
-            errorHandler(err, ws, req),
-          )();
-        }
-        if (onMessage) {
-          ws.on(
-            "message",
-            withWsErrorHandler(onMessage.bind(instance, ctx), (err) =>
-              errorHandler(err, ws, req),
-            ),
-          );
-        }
-        if (onClose) {
-          ws.on(
-            "close",
-            withWsErrorHandler(onClose.bind(instance, ctx), (err) =>
-              errorHandler(err, ws, req),
-            ),
-          );
-        }
-      };
-
-      withWsErrorHandler(handleConnection, (err) =>
-        errorHandler(err, ws, req),
-      )();
-    });
-
     return this;
   }
 
-  setExceptionHandler(handler: ExceptionHandler) {
-    this.#exceptionHandler = handler;
-    return this;
-  }
-
-  setNotFoundHandler(handler: NotFoundHandler) {
-    this.#notFoundHandler = handler;
-    return this;
-  }
+  // enableWebSocket(
+  //   controllers: Newable<IWebSocket>[],
+  //   fn?: (opt: WsOptions) => void,
+  // ) {
+  //   const wsMap = new Map<
+  //     string,
+  //     { controller: Newable<IWebSocket>; matcher: any }
+  //   >();
+  //   for (const c of controllers) {
+  //     const path = Reflect.getMetadata(WSCONTROLLER_METADATA.PATH, c);
+  //     if (!path)
+  //       throw new Error(`${c.name} is missing @WsController Decorator`);
+  //     wsMap.set(path, { controller: c, matcher: match(path) });
+  //   }
+  //
+  //   const options = new WsOptions();
+  //   if (fn) fn(options);
+  //
+  //   const wss = new WebSocketServer({ server: this.#server });
+  //
+  //   const errorHandler = async (
+  //     err: any,
+  //     ws: WebSocket,
+  //     req: IncomingMessage,
+  //   ) => {
+  //     this.logger.error(err);
+  //     if (options.onError) await options.onError(err, ws, req);
+  //     if (ws.readyState === WebSocket.OPEN)
+  //       ws.close(1011, "Internal Server Error");
+  //   };
+  //
+  //   wss.on("connection", (ws, req) => {
+  //     ws.on("error", (err) => {
+  //       this.logger.error(err);
+  //       if (ws.readyState === WebSocket.OPEN) {
+  //         ws.close(1011, "Internal Server Error");
+  //       }
+  //     });
+  //
+  //     const handleConnection = async () => {
+  //       const { pathname, searchParams } = new URL(req.url!, `ws://localhost`);
+  //       const auth = options.authHandler
+  //         ? await options.authHandler(req)
+  //         : true;
+  //       if (auth !== true) {
+  //         if (ws.readyState === WebSocket.OPEN) {
+  //           ws.close(auth.code, auth.reason);
+  //         }
+  //         return;
+  //       }
+  //
+  //       let ctor: Newable<IWebSocket> | undefined;
+  //       let pathParams: any;
+  //       for (const [, { controller, matcher }] of wsMap) {
+  //         const result = matcher(pathname.toLowerCase());
+  //         if (result) {
+  //           ctor = controller;
+  //           pathParams = result.params;
+  //           break;
+  //         }
+  //       }
+  //       if (!ctor) {
+  //         this.logger.warn(`No WS route matched: ${pathname}`);
+  //         if (ws.readyState === WebSocket.OPEN) {
+  //           ws.close(1008, "Invalid WebSocket Route");
+  //         }
+  //         return;
+  //       }
+  //       const instance = await this.#createRequestContainer().getAsync(ctor);
+  //       const { onMessage, onClose, onConnected } = instance;
+  //       const ctx: WebSocketContext = {
+  //         req,
+  //         pathParams,
+  //         queryParams: searchParams,
+  //         send: (data) => ws.send(data),
+  //         close: (code, reason) => ws.close(code, reason),
+  //       };
+  //       if (onConnected) {
+  //         withWsErrorHandler(onConnected.bind(instance, ctx), (err) =>
+  //           errorHandler(err, ws, req),
+  //         )();
+  //       }
+  //       if (onMessage) {
+  //         ws.on(
+  //           "message",
+  //           withWsErrorHandler(onMessage.bind(instance, ctx), (err) =>
+  //             errorHandler(err, ws, req),
+  //           ),
+  //         );
+  //       }
+  //       if (onClose) {
+  //         ws.on(
+  //           "close",
+  //           withWsErrorHandler(onClose.bind(instance, ctx), (err) =>
+  //             errorHandler(err, ws, req),
+  //           ),
+  //         );
+  //       }
+  //     };
+  //
+  //     withWsErrorHandler(handleConnection, (err) =>
+  //       errorHandler(err, ws, req),
+  //     )();
+  //   });
+  //
+  //   return this;
+  // }
 
   setMulterDefaults(options?: MulterOptions) {
     this.#multerDefaults = options;
   }
 
-  #useExceptionMiddleware: EmpackExceptionMiddlewareFunction = async (
-    err,
-    req,
-    res,
-    next,
-  ) => {
-    if (res.headersSent) return next(err);
-    this.logger.error(err);
-    let result;
-    let statusCode;
-    if (this.#exceptionHandler) {
-      const handlerResult = this.#exceptionHandler(err, req);
-      if (handlerResult) {
-        result = handlerResult.body;
-        statusCode = handlerResult.statusCode;
-      }
-    }
-    res.status(statusCode ?? 500).json(result ?? "Internal Server Error");
-  };
-
-  #useNotFoundMiddleware = async (req: Request, res: Response) => {
-    this.logger.warn(`Not found: ${req.method} ${req.originalUrl}`);
-    let statusCode;
-    let result;
-    if (this.#notFoundHandler) {
-      const handlerResult = this.#notFoundHandler(req);
-      if (handlerResult) {
-        result = handlerResult.body;
-        statusCode = handlerResult.statusCode;
-      }
-    }
-    res.status(statusCode ?? 404).json(result ?? "Not Found");
-  };
-
-  useMiddleware(
-    middleware:
-      | EmpackMiddlewareFunction
-      | EmpackExceptionMiddlewareFunction
-      | RequestHandler
-      | ErrorRequestHandler,
-  ) {
-    this.#app.use(middleware);
+  useMiddleware(middleware: EmpackMiddlewareFunction) {
+    this.#app.addHook("onRequest", middleware);
     return this;
   }
 
@@ -712,39 +611,39 @@ export class App {
     return this;
   }
 
-  useJsonParser(options?: bodyParser.OptionsJson) {
-    this.#app.use(express.json(options));
-    return this;
-  }
+  // useJsonParser(options?: bodyParser.OptionsJson) {
+  //   this.#app.use(express.json(options));
+  //   return this;
+  // }
+  //
+  // useUrlEncodedParser(
+  //   options: bodyParser.OptionsUrlencoded = { extended: true },
+  // ) {
+  //   this.#app.use(express.urlencoded(options));
+  //   return this;
+  // }
 
-  useUrlEncodedParser(
-    options: bodyParser.OptionsUrlencoded = { extended: true },
-  ) {
-    this.#app.use(express.urlencoded(options));
-    return this;
-  }
-
-  useCors(options: cors.CorsOptions) {
-    this.#app.use(cors(options));
-    return this;
-  }
+  // useCors(options: cors.CorsOptions) {
+  //   this.#app.use(cors(options));
+  //   return this;
+  // }
 
   useStatic(path: string) {
-    this.#app.use(express.static(path));
-    return this;
-  }
-
-  useHeaders(headers: Record<string, string>) {
-    this.#app.use((_req, res, next) => {
-      for (const [key, value] of Object.entries(headers)) {
-        res.setHeader(key, value);
-      }
-      next();
+    this.#app.register(fastifyStatic, {
+      root: path,
     });
     return this;
   }
 
-  useExtension(fn: (app: Application) => void) {
+  useHeaders(headers: Record<string, string>) {
+    this.#app.addHook("onSend", async (_req, reply, payload) => {
+      reply.headers(headers);
+      return payload;
+    });
+    return this;
+  }
+
+  useExtension(fn: (app: FastifyInstance) => void) {
     fn(this.#app);
     return this;
   }
@@ -752,48 +651,53 @@ export class App {
   run(port?: number) {
     port = port ?? 3000;
 
-    if (this.#swagger) {
-      let swaggerPath: string;
-      const { title, version, path, servers } = this.#swagger.options;
-      try {
-        const spec = generateOpenApiSpec(
-          this.#swagger.metaDataFn(),
-          title,
-          version,
-          servers,
-        );
-        swaggerPath = path ?? "/docs";
-        this.#app.use(swaggerPath, swaggerUI.serve, swaggerUI.setup(spec));
-        this.logger.info(
-          `Swagger UI available at http://localhost:${port}${swaggerPath}`,
-        );
-      } catch (err) {
-        this.logger.warn(`Swagger UI failed to initialize ${err}`);
+    // if (this.#swagger) {
+    //   let swaggerPath: string;
+    //   const { title, version, path, servers } = this.#swagger.options;
+    //   try {
+    //     const spec = generateOpenApiSpec(
+    //       this.#swagger.metaDataFn(),
+    //       title,
+    //       version,
+    //       servers,
+    //     );
+    //     swaggerPath = path ?? "/docs";
+    //     this.#app.use(swaggerPath, swaggerUI.serve, swaggerUI.setup(spec));
+    //     this.logger.info(
+    //       `Swagger UI available at http://localhost:${port}${swaggerPath}`,
+    //     );
+    //   } catch (err) {
+    //     this.logger.warn(`Swagger UI failed to initialize ${err}`);
+    //   }
+    // }
+
+    // if (this.#exceptionHandler) {
+    //   this.useMiddleware(this.#useExceptionMiddleware);
+    // }
+    // if (this.#notFoundHandler) {
+    //   this.useMiddleware(this.#useNotFoundMiddleware);
+    // }
+    //
+
+    this.#app.listen({ port }, (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        this.logger.info(`Listening on port ${port}`);
       }
-    }
-
-    if (this.#exceptionHandler) {
-      this.useMiddleware(this.#useExceptionMiddleware);
-    }
-    if (this.#notFoundHandler) {
-      this.useMiddleware(this.#useNotFoundMiddleware);
-    }
-
-    this.#server.listen(port, () => {
-      this.logger.info(`Listening on port ${port}`);
     });
 
-    this.#server.on("connection", (conn) => {
-      this.#connections.add(conn);
-      conn.on("close", () => {
-        this.#connections.delete(conn);
-      });
-    });
-
-    this.#server.setTimeout(this.options.setTimeout);
-
-    process.on("SIGINT", this.#gracefulShutdown.bind(this));
-    process.on("SIGTERM", this.#gracefulShutdown.bind(this));
+    // this.#server.on("connection", (conn) => {
+    //   this.#connections.add(conn);
+    //   conn.on("close", () => {
+    //     this.#connections.delete(conn);
+    //   });
+    // });
+    //
+    // this.#server.setTimeout(this.options.setTimeout);
+    //
+    // process.on("SIGINT", this.#gracefulShutdown.bind(this));
+    // process.on("SIGTERM", this.#gracefulShutdown.bind(this));
   }
 
   #bindLogger() {
@@ -802,19 +706,19 @@ export class App {
       .toConstantValue(this.logger);
   }
 
-  #gracefulShutdown() {
-    this.logger.info("Starting graceful shutdown...");
-
-    this.#server?.close(() => {
-      this.logger.info("Closed server, exiting process.");
-      setTimeout(() => {
-        process.exit(0);
-      }, 1000);
-    });
-
-    setTimeout(() => {
-      this.logger.info("Forcing close of connections...");
-      this.#connections.forEach((conn) => conn.destroy());
-    }, this.options.gracefulShutdownTimeout ?? 30_000);
-  }
+  // #gracefulShutdown() {
+  //   this.logger.info("Starting graceful shutdown...");
+  //
+  //   this.#server?.close(() => {
+  //     this.logger.info("Closed server, exiting process.");
+  //     setTimeout(() => {
+  //       process.exit(0);
+  //     }, 1000);
+  //   });
+  //
+  //   setTimeout(() => {
+  //     this.logger.info("Forcing close of connections...");
+  //     this.#connections.forEach((conn) => conn.destroy());
+  //   }, this.options.gracefulShutdownTimeout ?? 30_000);
+  // }
 }

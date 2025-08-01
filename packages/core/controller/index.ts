@@ -7,13 +7,12 @@ export type {
 export type { IWebSocket } from "./interfaces/index";
 export {
   Guard,
-  FromLocals,
   FromQuery,
   FromParam,
   FromFiles,
   FromFile,
   FromBody,
-  FromRes,
+  FromReply,
   FromReq,
   FromMultipart,
   FromCookie,

@@ -1,20 +1,23 @@
 import { JwtHandler, JwtHandlerResult, JwTokenSettings } from "./types";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import { IJwTokenHelper } from "./interfaces";
-import { NextFunction, Response, Request } from "../../core";
+import { FastifyReply, FastifyRequest } from "../../core";
 
 export function jwtGuard(secret: string, handler?: JwtHandler) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: FastifyRequest, reply: FastifyReply) => {
     function handleError(
       fallbackStatus: number,
       fallbackMessage: string,
-      handlerFn?: (req: Request, res: Response) => JwtHandlerResult,
+      handlerFn?: (
+        req: FastifyRequest,
+        reply: FastifyReply,
+      ) => JwtHandlerResult,
     ) {
       if (handlerFn) {
-        const result = handlerFn(req, res);
-        res.status(result.status).json(result.body);
+        const result = handlerFn(req, reply);
+        return reply.status(result.status).send(result.body);
       } else {
-        res.status(fallbackStatus).json(fallbackMessage);
+        return reply.status(fallbackStatus).send(fallbackMessage);
       }
     }
 
@@ -26,12 +29,9 @@ export function jwtGuard(secret: string, handler?: JwtHandler) {
     token = token.slice(7, token.length);
     try {
       const payload = verify(token, secret);
-      res.locals.jwt = payload;
       if (handler?.onSuccess) {
-        handler.onSuccess(payload, req, res, next);
+        handler.onSuccess(payload, req, reply);
         return;
-      } else {
-        next();
       }
     } catch (err: any) {
       if (err.name === "TokenExpiredError") {
@@ -39,7 +39,6 @@ export function jwtGuard(secret: string, handler?: JwtHandler) {
       } else {
         handleError(401, "Unauthorized", handler?.onUnauthorized);
       }
-      return;
     }
   };
 }

@@ -1,12 +1,6 @@
-import {
-  Request,
-  Response,
-  NextFunction,
-  RequestHandler,
-  ErrorRequestHandler,
-} from "express";
-import { IEmpackExceptionMiddleware, IEmpackMiddleware } from "../interfaces";
+import { IEmpackMiddleware } from "../interfaces";
 import { Newable } from "inversify";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 export type HandlerResult = {
   statusCode?: number;
@@ -14,36 +8,15 @@ export type HandlerResult = {
 };
 
 export type EmpackMiddlewareFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
+  req: FastifyRequest,
+  reply: FastifyReply,
 ) => void | Promise<void>;
-
-export type EmpackExceptionMiddlewareFunction = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => void | Promise<void>;
-
-export type ExceptionHandler = (
-  err: Error,
-  req: Request,
-) => HandlerResult | void;
-
-export type NotFoundHandler = (req: Request) => HandlerResult | void;
 
 export type WsAuthResult = true | { code: number; reason: string | Buffer };
 
 export type EmpackMiddleware =
-  | RequestHandler
   | EmpackMiddlewareFunction
   | Newable<IEmpackMiddleware>;
-
-export type EmpackExceptionMiddleware =
-  | ErrorRequestHandler
-  | EmpackExceptionMiddlewareFunction
-  | Newable<IEmpackExceptionMiddleware>;
 
 export type OpenApiOptions = {
   title?: string;

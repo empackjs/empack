@@ -1,28 +1,17 @@
-import {
-  APP_TOKEN,
-  EmpackMiddlewareFunction,
-  IEmpackMiddleware,
-  ILogger,
-  Inject,
-  NextFunction,
-  Request,
-  Response,
-} from "@empackjs/core";
+import { FastifyReply, FastifyRequest, IEmpackMiddleware } from "../../../packages/core";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export class AsyncTestMiddleware implements IEmpackMiddleware {
-  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
-  async use(_req: Request, _res: Response, next: NextFunction): Promise<void> {
-    this.logger.debug("Middleware start");
+  async use(_req: FastifyRequest, _reply: FastifyReply,): Promise<void> {
+    console.log("start")
     await delay(1000);
-    this.logger.debug("Middleware end");
-    next();
+    console.log("end")
   }
 }
 
-export const rateLimiter: EmpackMiddlewareFunction = (_req, _res, next) => {
-  return next(new Error("Too many requests"));
-};
+// export const rateLimiter: EmpackMiddlewareFunction = (_req, _res, next) => {
+//   return next(new Error("Too many requests"));
+// };

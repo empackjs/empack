@@ -1,7 +1,7 @@
-import { CookieOptions } from "express";
 import { IncomingMessage } from "http";
 import { EmpackMiddleware } from "../../app/types/index";
 import { Newable } from "inversify";
+import { CookieSerializeOptions as CookieOptions } from "@fastify/cookie";
 
 export type GuardMiddleware = EmpackMiddleware | "none";
 
@@ -20,7 +20,7 @@ export type RouteDefinition = {
   method: "get" | "post" | "put" | "delete" | "patch";
   path: string;
   handlerName: string;
-  middleware?: EmpackMiddleware[];
+  middleware: EmpackMiddleware[];
 };
 
 export type ParamMetadata = {
@@ -35,9 +35,8 @@ export type ParamSource =
   | "body"
   | "query"
   | "param"
-  | "locals"
   | "req"
-  | "res"
+  | "reply"
   | "file"
   | "files"
   | "multipart"

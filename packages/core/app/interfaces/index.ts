@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 export interface ILogger {
   error(message: Error): void;
@@ -13,14 +13,5 @@ export interface IEnv {
 }
 
 export interface IEmpackMiddleware {
-  use(req: Request, res: Response, next: NextFunction): void | Promise<void>;
-}
-
-export interface IEmpackExceptionMiddleware {
-  use(
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void | Promise<void>;
+  use(req: FastifyRequest, reply: FastifyReply): void | Promise<void>;
 }
