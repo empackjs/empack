@@ -1,11 +1,11 @@
-import { BindingScope, ContainerModule } from "./types";
+import { BindingScope, ContainerModule as Module } from "./types";
 
-export abstract class Module {
-  #binder: ContainerModule[] = [];
+export abstract class ContainerModule {
+  #binder: Module[] = [];
 
   abstract register(bind: BindingScope): void;
 
-  getBindings(): ContainerModule[] {
+  getBindings(): Module[] {
     return this.#binder;
   }
 

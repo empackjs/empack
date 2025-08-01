@@ -1,5 +1,5 @@
 import { JwtPayload, SignOptions } from "jsonwebtoken";
-import { NextFunction, Request, Response } from "../../../core";
+import { FastifyReply, FastifyRequest } from "../../../core";
 
 export type JwtHandlerResult = {
   status: number;
@@ -7,13 +7,15 @@ export type JwtHandlerResult = {
 };
 
 export type JwtHandler = {
-  onUnauthorized?: (req: Request, res: Response) => JwtHandlerResult;
-  onExpired?: (req: Request, res: Response) => JwtHandlerResult;
+  onUnauthorized?: (
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ) => JwtHandlerResult;
+  onExpired?: (req: FastifyRequest, reply: FastifyReply) => JwtHandlerResult;
   onSuccess?: (
     payload: string | JwtPayload,
-    req: Request,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest,
+    reply: FastifyReply,
   ) => void;
 };
 

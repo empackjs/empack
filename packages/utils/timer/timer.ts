@@ -1,14 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { TimerHanlder, TimeSpan } from "./types";
-import {
-  EmpackMiddlewareFunction,
-  ILogger,
-  NextFunction,
-  Request,
-  Response,
-} from "../../core";
-import onFinished from "on-finished";
+import { TimeSpan } from "./types";
 
 const timerStorage = new AsyncLocalStorage<Timer>();
 
@@ -61,37 +53,6 @@ export class Timer {
   getAllTimeSpans(): TimeSpan[] {
     return this.#timeSpans;
   }
-}
-
-export function timerMiddleware(
-  logger: ILogger,
-  handler?: TimerHanlder,
-): EmpackMiddlewareFunction {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const timer = Timer.create();
-    const start = performance.now();
-
-    onFinished(res, () => {
-      const end = performance.now();
-      const duration = end - start;
-      const ts = timer.getAllTimeSpans();
-      if (handler) {
-        handler(duration, ts, req, res);
-        return;
-      }
-      let msg = `Request: ${res.statusCode} ${req.method} ${req.originalUrl} - Duration: ${duration.toFixed(2)} ms`;
-      const tsMsg = ts.map((span) => {
-        const prefix = " ".repeat((span.depth ? span.depth * 3 : 0) + 28);
-        return `\n${prefix}⎣__TimeSpan: ${span.duration?.toFixed(2) ?? "N/A"} ms - ${span.label}`;
-      });
-      msg += tsMsg.join("");
-      logger.debug(msg);
-    });
-
-    timerStorage.run(timer, () => {
-      next();
-    });
-  };
 }
 
 export function Track(timer?: Timer): ClassDecorator & MethodDecorator {

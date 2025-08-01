@@ -1,4 +1,3 @@
-import { NextFunction, Request, Response } from "express";
 import { ParamMetadata, ResponseWith, RouteDefinition } from "../types";
 import { EmpackMiddleware } from "../../app";
 import {
@@ -9,6 +8,8 @@ import {
   ResWith,
 } from "../responses";
 import { PARAM_METADATA_KEY } from "./param";
+import { FastifyReply, FastifyRequest } from "fastify";
+import fs from "fs";
 
 export const ROUTE_METADATA_KEY = Symbol("empack:route_metadata");
 export const ROUTE_METHOD = Symbol("empack:route_method");
@@ -20,16 +21,30 @@ export const Put = createRouteDecorator("put");
 export const Delete = createRouteDecorator("delete");
 export const Patch = createRouteDecorator("patch");
 
-function applyWithData(res: Response, withData: ResponseWith = {}) {
+// function simplifyFilesMap(
+//   filesMap: Record<string, any[]>,
+// ): Record<string, any[]> {
+//   return Object.fromEntries(
+//     Object.entries(filesMap).map(([key, fileArray]) => [
+//       key,
+//       fileArray.map((file) => ({
+//         filename: file.filename,
+//         mimetype: file.mimetype,
+//         file: file.file,
+//         toBuffer: file.toBuffer,
+//       })),
+//     ]),
+//   );
+// }
+
+function applyWithData(reply: FastifyReply, withData: ResponseWith = {}) {
   if (withData.headers) {
-    for (const [key, value] of Object.entries(withData.headers)) {
-      res.setHeader(key, value);
-    }
+    reply.headers(withData.headers);
   }
 
   if (withData.cookies) {
     for (const cookie of withData.cookies) {
-      res.cookie(cookie.key, cookie.value, cookie.options);
+      reply.cookie(cookie.key, cookie.value, cookie.options);
     }
   }
 }
@@ -40,13 +55,15 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
       const original = descriptor.value;
 
       descriptor.value = async function (
-        req: Request,
-        res: Response,
-        next: NextFunction,
+        req: FastifyRequest,
+        reply: FastifyReply,
       ) {
         try {
           const paramMeta: ParamMetadata[] =
             Reflect.getMetadata(PARAM_METADATA_KEY, target, propertyKey) || [];
+
+          const contentType = req.headers["content-type"] || "";
+          const isMultipart = contentType.includes("multipart/form-data");
 
           const args: any[] = [];
           for (let i = 0; i < original.length; i++) {
@@ -60,7 +77,20 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
             let rawValue: any;
             switch (meta.source) {
               case "body":
-                rawValue = req.body;
+                if (isMultipart) {
+                  const body = Object.fromEntries(
+                    Object.entries(req.body as any)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      .filter(([_, v]) => {
+                        if (Array.isArray(v)) return v[0]?.type !== "file";
+                        return (v as any)?.type !== "file";
+                      })
+                      .map(([key, prop]) => [key, (prop as any).value]),
+                  );
+                  rawValue = body;
+                } else {
+                  rawValue = req.body;
+                }
                 break;
               case "query":
                 rawValue = req.query;
@@ -68,38 +98,59 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
               case "param":
                 rawValue = req.params;
                 break;
-              case "locals":
-                rawValue = res.locals;
-                break;
               case "req":
                 rawValue = req;
                 break;
-              case "res":
-                rawValue = res;
+              case "reply":
+                rawValue = reply;
                 break;
               case "files":
-                rawValue = req.files;
-                break;
-              case "file":
-                rawValue = req.file;
+                rawValue = [];
+                if (isMultipart) {
+                  const filesOnly = Object.fromEntries(
+                    Object.entries(req.body as any)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      .filter(([_, v]) => {
+                        if (Array.isArray(v)) return v[0]?.type === "file";
+                        return (v as any)?.type === "file";
+                      })
+                      .map(([key, v]) => {
+                        const files = Array.isArray(v) ? v : [v];
+                        return [key, files];
+                      }),
+                  );
+                  rawValue = filesOnly;
+                }
                 break;
               case "multipart":
-                rawValue = {
-                  ...req.body,
-                };
-
-                meta.fileNames?.forEach((name) => {
-                  let value: any;
-                  if (Array.isArray(req.files)) {
-                    value = req.files.filter((f) => f.fieldname === name);
-                  } else if (req.files && typeof req.files === "object") {
-                    value = req.files[name];
-                  } else if (req.file?.fieldname === name) {
-                    value = req.file;
-                  }
-                  rawValue[name] = value;
-                });
-
+                rawValue = {};
+                if (isMultipart) {
+                  const body = Object.fromEntries(
+                    Object.entries(req.body as any)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      .filter(([_, v]) => {
+                        if (Array.isArray(v)) return v[0]?.type !== "file";
+                        return (v as any)?.type !== "file";
+                      })
+                      .map(([key, prop]) => [key, (prop as any).value]),
+                  );
+                  const filesOnly = Object.fromEntries(
+                    Object.entries(req.body as any)
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      .filter(([_, v]) => {
+                        if (Array.isArray(v)) return v[0]?.type === "file";
+                        return (v as any)?.type === "file";
+                      })
+                      .map(([key, v]) => {
+                        const files = Array.isArray(v) ? v : [v];
+                        return [key, files];
+                      }),
+                  );
+                  rawValue = {
+                    ...body,
+                    ...filesOnly,
+                  };
+                }
                 break;
               case "cookie":
                 rawValue = req.cookies;
@@ -115,30 +166,30 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
           }
 
           const result = await original.apply(this, args);
-          if (res.headersSent) return;
-          if (!result) {
-            throw new Error(
-              `No response returned from action ${req.method} ${req.path}`,
-            );
-          }
-
           if (result instanceof ResWith) {
-            applyWithData(res, result.getWithData());
+            applyWithData(reply, result.getWithData());
           }
           if (result instanceof JsonResponse) {
-            return res.status(result.status).json(result.body);
+            return reply.status(result.status).send(result.body);
           }
           if (result instanceof FileResponse) {
-            return res.download(result.filePath, result.fileName);
+            reply.header(
+              "Content-Disposition",
+              `attachment; filename="${result.fileName}"`,
+            );
+            return reply.send(fs.createReadStream(result.filePath));
           }
           if (result instanceof BufferResponse) {
-            return res.end(result.data);
+            return reply.send(result.data);
           }
           if (result instanceof RedirectResponse) {
-            return res.redirect(result.status, result.url);
+            return reply.redirect(result.url, result.status);
+          }
+          if (result !== undefined) {
+            return reply.send(result);
           }
         } catch (err) {
-          next(err);
+          throw err as Error;
         }
       };
 

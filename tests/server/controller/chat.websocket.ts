@@ -1,30 +1,20 @@
 import {
-    APP_TOKEN,
-  ILogger,
-  Inject,
+  FastifyRequest,
+  Guard,
   IWebSocket,
   RawData,
   WebSocketContext,
   WsController,
-} from "@empackjs/core";
+} from "../../../packages/core";
 
-@WsController("/chat/room/:id")
-export class ChatWebSocket implements IWebSocket {
-  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
-
-  onConnected(ctx: WebSocketContext): void | Promise<void> {
-    ctx.send(`chat is connected, req:${ctx.req.url}`);
-    ctx.send(`pathParams id:${ctx.pathParams.id}`);
-    ctx.send(`queryParams token:${ctx.queryParams.get("token")}`);
-  }
-
+@Guard("none")
+@WsController("/chat/:id")
+export class ChatGateway implements IWebSocket {
   onMessage(
+    message: RawData,
+    req: FastifyRequest,
     ctx: WebSocketContext,
-    data: RawData,
-    isBinary: boolean,
   ): void | Promise<void> {
-    this.logger.debug(`chat web socket send:${data}`);
-    // throw new Error("ws error test");
-    ctx.send(`response from server your data:${data}, isBinary:${isBinary}`);
+
   }
 }

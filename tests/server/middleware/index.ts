@@ -1,28 +1,38 @@
 import {
   APP_TOKEN,
-  EmpackMiddlewareFunction,
+  FastifyReply,
+  FastifyRequest,
   IEmpackMiddleware,
+  IEnv,
   ILogger,
   Inject,
-  NextFunction,
-  Request,
-  Response,
-} from "@empackjs/core";
+} from "../../../packages/core";
+import { Env } from "../main";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export class AsyncTestMiddleware implements IEmpackMiddleware {
-  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
-  async use(_req: Request, _res: Response, next: NextFunction): Promise<void> {
-    this.logger.debug("Middleware start");
+  constructor(
+    @Inject(APP_TOKEN.ILogger) private logger: ILogger,
+    @Inject(APP_TOKEN.IEnv) private env: IEnv<Env>,
+  ) {}
+
+  async use() {
+    const path = this.env.get("DOWNLOAD_PATH");
+    console.log(path);
+    this.logger.debug("Before delay");
     await delay(1000);
-    this.logger.debug("Middleware end");
-    next();
+    this.logger.debug("After delay");
   }
 }
 
-export const rateLimiter: EmpackMiddlewareFunction = (_req, _res, next) => {
-  return next(new Error("Too many requests"));
-};
+export class ReplyTestMiddleware implements IEmpackMiddleware {
+  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
+
+  async use(_req: FastifyRequest, reply: FastifyReply) {
+    this.logger.debug("stop test");
+    reply.status(400).send("stop test");
+  }
+}

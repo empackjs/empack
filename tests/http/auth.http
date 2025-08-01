@@ -2,12 +2,17 @@
 
 ###
 
-POST {{host}}/register
+GET http://localhost:3000/hello
+Content-Type: application/json
+
+###
+
+POST {{host}}/register/5
 Content-Type: application/json
 
 {
     "account": "test1",
-    "password": "testtest",
+    "password": "tes234234ttest",
     "username": "test"
 }
 
@@ -52,7 +57,26 @@ POST {{host}}/file
 Content-Type: multipart/form-data; boundary=b
 
 --b
-Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Disposition: form-data; name="user"
+
+lai
+--b
+Content-Disposition: form-data; name="upload"; filename="test.txt"
+Content-Type: text/plain
 
 < ./assets/test.txt
+--b
+Content-Disposition: form-data; name="upload"; filename="test2.txt"
+Content-Type: text/plain
+
+< ./assets/test.txt
+--b
+Content-Disposition: form-data; name="upload2"; filename="test.txt"
+Content-Type: text/plain
+
+< ./assets/test.txt
+--b
+Content-Disposition: form-data; name="name"
+
+ben
 --b--

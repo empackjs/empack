@@ -1,5 +1,37 @@
 import { ResponseWith } from "./types/index";
 
+export enum Status {
+  // 2xx Success
+  OK = 200,
+  Created = 201,
+  Accepted = 202,
+  NoContent = 204,
+
+  // 3xx Redirection
+  MovedPermanently = 301,
+  Found = 302,
+  SeeOther = 303,
+  TemporaryRedirect = 307,
+  PermanentRedirect = 308,
+
+  // 4xx Client Error
+  BadRequest = 400,
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  MethodNotAllowed = 405,
+  Conflict = 409,
+  UnsupportedMediaType = 415,
+  TooManyRequests = 429,
+
+  // 5xx Server Error
+  InternalServerError = 500,
+  NotImplemented = 501,
+  BadGateway = 502,
+  ServiceUnavailable = 503,
+  GatewayTimeout = 504,
+}
+
 export abstract class ResWith {
   #withData: ResponseWith = {};
 

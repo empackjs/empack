@@ -1,26 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import { FastifyReply, FastifyRequest } from "fastify";
 
-export interface ILogger {
-  error(message: Error): void;
-  warn(message: string): void;
-  info(message: string): void;
-  debug(message: string): void;
-}
-
-export interface IEnv {
-  get(key: string): string;
-  getOptional(key: string): string | undefined;
+export interface IEnv<T> {
+  get(key: keyof T): string;
+  getOptional(key: keyof T): string | undefined;
 }
 
 export interface IEmpackMiddleware {
-  use(req: Request, res: Response, next: NextFunction): void | Promise<void>;
-}
-
-export interface IEmpackExceptionMiddleware {
-  use(
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void | Promise<void>;
+  use(req: FastifyRequest, reply: FastifyReply): void | Promise<void>;
 }

@@ -1,57 +1,31 @@
-import {
-  Request,
-  Response,
-  NextFunction,
-  RequestHandler,
-  ErrorRequestHandler,
-} from "express";
-import { IEmpackExceptionMiddleware, IEmpackMiddleware } from "../interfaces";
+import { IEmpackMiddleware } from "../interfaces";
+import type { WebSocket } from "ws";
 import { Newable } from "inversify";
-
-export type HandlerResult = {
-  statusCode?: number;
-  body?: any;
-};
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  FastifyServerOptions,
+} from "fastify";
 
 export type EmpackMiddlewareFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
+  req: FastifyRequest,
+  reply: FastifyReply,
 ) => void | Promise<void>;
-
-export type EmpackExceptionMiddlewareFunction = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => void | Promise<void>;
-
-export type ExceptionHandler = (
-  err: Error,
-  req: Request,
-) => HandlerResult | void;
-
-export type NotFoundHandler = (req: Request) => HandlerResult | void;
-
-export type WsAuthResult = true | { code: number; reason: string | Buffer };
 
 export type EmpackMiddleware =
-  | RequestHandler
   | EmpackMiddlewareFunction
   | Newable<IEmpackMiddleware>;
 
-export type EmpackExceptionMiddleware =
-  | ErrorRequestHandler
-  | EmpackExceptionMiddlewareFunction
-  | Newable<IEmpackExceptionMiddleware>;
+export type AppOptions = FastifyServerOptions & { routePrefix?: string };
 
-export type OpenApiOptions = {
-  title?: string;
-  version?: string;
-  path?: string;
-  sortBy?: "method" | "route";
-  servers?: {
-    description?: string;
-    url: string;
-  }[];
+export type WsOptions = {
+  wsPrefix: string;
+  errorHandler?: (
+    this: FastifyInstance,
+    error: Error,
+    socket: WebSocket,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => void;
 };

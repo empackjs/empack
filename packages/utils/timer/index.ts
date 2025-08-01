@@ -1,2 +1,2 @@
-export type { TimeSpan, TimerHanlder } from "./types";
-export { timerMiddleware, Timer, Track } from "./timer";
+export type { TimeSpan } from "./types";
+export { Timer, Track } from "./timer";

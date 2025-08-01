@@ -1,8 +1,5 @@
-export type {
-  MulterFile,
-  MultiField,
-  MulterConfig,
-  MulterOptions,
-} from "./types";
+export { Multipart } from "@fastify/multipart";
+
+export type { MulterOptions, MulterFile } from "./types";
 
 export { UseMultipart } from "./decorator";

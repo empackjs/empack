@@ -23,18 +23,10 @@
   ],
   "devDependencies": {
     "@swc/core": "^1.13.2",
-    "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
-    "@types/on-finished": "^2.3.5",
     "tsup": "^8.5.0"
   },
   "dependencies": {
-    "express-validator": "^7.2.1",
-    "jsonwebtoken": "^9.0.2",
-    "on-finished": "^2.4.1",
-    "uuid": "^11.1.0",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "jsonwebtoken": "^9.0.2"
   }
 }

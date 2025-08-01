@@ -1,18 +1,22 @@
-import { RawData } from "ws";
+import { FastifyRequest } from "fastify";
 import { WebSocketContext } from "../types/index";
+import { RawData } from "ws";
 
 export interface IWebSocket {
-  onConnected?(ctx: WebSocketContext): void | Promise<void>;
+  onConnected?(
+    req: FastifyRequest,
+    ctx: WebSocketContext,
+  ): void | Promise<void>;
 
   onMessage?(
+    message: RawData,
+    req: FastifyRequest,
     ctx: WebSocketContext,
-    data: RawData,
-    isBinary: boolean,
   ): void | Promise<void>;
 
   onClose?(
-    ctx: WebSocketContext,
     code: number,
     reason: string | Buffer,
+    ctx: WebSocketContext,
   ): void | Promise<void>;
 }
