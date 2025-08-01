@@ -8,7 +8,7 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
-    "@empackjs/core": "file:pack/empackjs-core-0.0.2.tgz",
+    "@empackjs/core": "file:pack/empackjs-core-0.0.3.tgz",
     "@empackjs/utils": "file:pack/empackjs-utils-0.0.1.tgz",
     "dotenv": "^17.2.1"
   }

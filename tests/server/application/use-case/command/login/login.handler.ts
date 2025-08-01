@@ -15,7 +15,7 @@ import { LoginError, LoginResult } from "./login.result";
 import {
     APP_TOKEN,
   HandleFor,
-  inject,
+  Inject,
   IPublisher,
   IReqHandler,
 } from "@empackjs/core";
@@ -26,11 +26,11 @@ export class LoginHandler
   implements IReqHandler<LoginCommand, OneOf<LoginResult, LoginError>>
 {
   constructor(
-    @inject(APP_TOKEN.IPublisher) private _publisher: IPublisher,
-    @inject(UserRepository) private _userRepository: IUserRepository,
-    @inject(AccessTokenSymbol)
+    @Inject(APP_TOKEN.IPublisher) private _publisher: IPublisher,
+    @Inject(UserRepository) private _userRepository: IUserRepository,
+    @Inject(AccessTokenSymbol)
     private _accessTokenHelper: IJwTokenHelper,
-    @inject(RefreshTokenSymbol)
+    @Inject(RefreshTokenSymbol)
     private _refreshTokenHelper: IJwTokenHelper,
   ) {}
 

@@ -1,12 +1,12 @@
 import { Track } from "@empackjs/utils";
 import { UserRoot } from "../../domain/user/user.root";
-import { injectable } from "@empackjs/core";
+import { Injectable } from "@empackjs/core";
 import { IUserRepository } from "../../application/persistence/user.repository";
 
 const memory_db: UserRoot[] = [];
 
 @Track()
-@injectable()
+@Injectable()
 export class UserRepository implements IUserRepository {
   async create(user: UserRoot): Promise<UserRoot> {
     memory_db.push(user);

@@ -4,7 +4,7 @@ import { RegisterCommand } from "./register.command";
 import { RegisterError, RegisterResult } from "./register.result";
 import { UserRoot } from "../../../../domain/user/user.root";
 import { ErrorReturn, OkReturn, OneOf, Track, uuid } from "@empackjs/utils";
-import { HandleFor, inject, IReqHandler } from "@empackjs/core";
+import { HandleFor, Inject, IReqHandler } from "@empackjs/core";
 import { IUserRepository } from "../../../persistence/user.repository";
 import { UserService } from "../../../../service";
 
@@ -14,7 +14,7 @@ export class RegisterHandler
   implements IReqHandler<RegisterCommand, OneOf<RegisterResult, RegisterError>>
 {
   constructor(
-    @inject(UserRepository) private _userRepository: IUserRepository,
+    @Inject(UserRepository) private _userRepository: IUserRepository,
     private _userSvc: UserService
   ) {}
 

@@ -1,6 +1,6 @@
-import { injectable } from "@empackjs/core";
+import { Injectable } from "@empackjs/core";
 
-@injectable("request")
+@Injectable("request")
 export class UserService {
   index = 1;
 

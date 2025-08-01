@@ -1,7 +1,7 @@
 import {
     APP_TOKEN,
   ILogger,
-  inject,
+  Inject,
   IWebSocket,
   RawData,
   WebSocketContext,
@@ -10,7 +10,7 @@ import {
 
 @WsController("/chat/room/:id")
 export class ChatWebSocket implements IWebSocket {
-  constructor(@inject(APP_TOKEN.ILogger) private logger: ILogger) {}
+  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
 
   onConnected(ctx: WebSocketContext): void | Promise<void> {
     ctx.send(`chat is connected, req:${ctx.req.url}`);

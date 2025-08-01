@@ -3,7 +3,7 @@ import {
   EmpackMiddlewareFunction,
   IEmpackMiddleware,
   ILogger,
-  inject,
+  Inject,
   NextFunction,
   Request,
   Response,
@@ -14,7 +14,7 @@ function delay(ms: number) {
 }
 
 export class AsyncTestMiddleware implements IEmpackMiddleware {
-  constructor(@inject(APP_TOKEN.ILogger) private logger: ILogger) {}
+  constructor(@Inject(APP_TOKEN.ILogger) private logger: ILogger) {}
   async use(_req: Request, _res: Response, next: NextFunction): Promise<void> {
     this.logger.debug("Middleware start");
     await delay(1000);
