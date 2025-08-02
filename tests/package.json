@@ -8,8 +8,9 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
-    "@empackjs/core": "file:pack/empackjs-core-0.0.3.tgz",
-    "@empackjs/utils": "file:pack/empackjs-utils-0.0.1.tgz",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "@sinclair/typebox": "^0.34.38",
     "dotenv": "^17.2.1"
   }
 }

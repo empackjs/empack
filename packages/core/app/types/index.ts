@@ -2,11 +2,6 @@ import { IEmpackMiddleware } from "../interfaces";
 import { Newable } from "inversify";
 import { FastifyReply, FastifyRequest } from "fastify";
 
-export type HandlerResult = {
-  statusCode?: number;
-  body?: any;
-};
-
 export type EmpackMiddlewareFunction = (
   req: FastifyRequest,
   reply: FastifyReply,

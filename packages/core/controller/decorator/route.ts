@@ -165,8 +165,6 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
           }
 
           const result = await original.apply(this, args);
-          if (result !== undefined) reply.send(result);
-
           if (result instanceof ResWith) {
             applyWithData(reply, result.getWithData());
           }
@@ -181,6 +179,9 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
           }
           if (result instanceof RedirectResponse) {
             return reply.redirect(result.url, result.status);
+          }
+          if (result !== undefined) {
+            return reply.send(result);
           }
         } catch (err) {
           throw err as Error;

@@ -1,32 +1,44 @@
-import fs from "fs";
-
 import {
   Controller,
-  FastifyRequest,
   FromBody,
-  FromFiles,
   FromMultipart,
-  FromReq,
+  FromParam,
   Guard,
-  MulterFile,
   Post,
   Responses,
+  Schema,
+  Status,
   UseMultipart,
 } from "../../../packages/core";
-import { RegisterReq } from "../../server/contract/auth/register";
 import { AsyncTestMiddleware } from "../../server/middleware";
-import { pipeline } from "stream/promises";
+import {
+  RegisterReq,
+  RegisterBody,
+  RegisterOK,
+  RegisterRes,
+} from "../contract/auth/register";
 
 @Guard("none")
 @Controller("/auth")
 export class AuthController {
-  @Post("/register")
-  async register(@FromBody() body: RegisterReq) {
-    console.log(body);
-    return Responses.OK("ok");
+  @Schema({
+    description: "會員註冊",
+    body: RegisterBody,
+    response: {
+      [Status.OK]: RegisterOK,
+    },
+  })
+  @Post("/register/:id")
+  async register(@FromBody() body: RegisterReq, @FromParam("id") id: number) {
+    console.log(id)
+    const { username, account } = body;
+    return Responses.OK<RegisterRes>({
+      account,
+      username: username ?? "",
+    });
   }
 
-  @Post("/file")
+  @Post("/file", AsyncTestMiddleware)
   @UseMultipart()
   async file(@FromMultipart() multi: any) {
     console.log(multi);

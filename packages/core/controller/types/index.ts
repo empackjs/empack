@@ -50,3 +50,13 @@ export type WebSocketContext = {
   send(data: string | Buffer): void;
   close(code: number, reason: string | Buffer): void;
 };
+
+export type SchemaMetadata = {
+  description?: string;
+  tag?: string[];
+  summary?: string;
+  params?: any;
+  querystring?: any;
+  body?: any;
+  response?: Record<number, any>;
+};

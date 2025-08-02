@@ -3,6 +3,7 @@ export type {
   ResponseWith,
   Cookie,
   WebSocketContext,
+  SchemaMetadata,
 } from "./types/index";
 export type { IWebSocket } from "./interfaces/index";
 export {
@@ -24,6 +25,7 @@ export {
   Delete,
   Controller,
   WsController,
+  Schema,
 } from "./decorator/index";
 export {
   Responses,
@@ -32,4 +34,5 @@ export {
   JsonResponse,
   FileResponse,
   RedirectResponse,
+  Status,
 } from "./responses";

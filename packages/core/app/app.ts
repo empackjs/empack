@@ -1,47 +1,34 @@
 import "reflect-metadata";
 import { Container, Newable } from "inversify";
-import http, { IncomingMessage } from "http";
-import { WebSocket, WebSocketServer } from "ws";
-import { Socket } from "net";
-import cors from "cors";
-import bodyParser from "body-parser";
+import { IncomingMessage } from "http";
+import { WebSocket } from "ws";
 import { MediatorPipe } from "../mediator/index";
 import {
   EmpackMiddleware,
   EmpackMiddlewareFunction,
-  OpenApiOptions,
   WsAuthResult,
 } from "./types/index";
 import { Module } from "../di/index";
 import { EventMap, MediatorMap } from "../mediator/types/index";
-import { IWebSocket } from "../controller/interfaces/index";
 import { IEmpackMiddleware, IEnv, ILogger } from "./interfaces/index";
-import { match } from "path-to-regexp";
 import { GuardMiddleware } from "../controller";
-import { RouteDefinition, WebSocketContext } from "../controller/types";
+import { RouteDefinition } from "../controller/types";
 import { Mediator } from "../mediator/mediator";
 import { MEDIATOR_KEY } from "../mediator/decorator";
 import {
   CONTROLLER_METADATA,
   GUARD_KEY,
   ROUTE_METADATA_KEY,
-  ROUTE_METHOD,
-  ROUTE_PATH,
-  WSCONTROLLER_METADATA,
 } from "../controller/decorator";
-import { ApiDocOptions } from "../openapi";
-import { APIDOC_KEY } from "../openapi/decorator";
-import { ApiDocMetaData } from "../openapi/types";
-import { generateOpenApiSpec } from "../openapi/openapi";
-import swaggerUI from "swagger-ui-express";
 import { APP_TOKEN } from "../token";
 import { MulterOptions } from "../multer/types";
 import { MULTER_KEY } from "../multer/decorator";
-import multer from "multer";
 import fastify, { FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
-import multipart, { MultipartFile } from "@fastify/multipart";
+import multipart from "@fastify/multipart";
+import { SCHEMA_KEY } from "../controller/decorator/schema";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -60,46 +47,6 @@ function mergeMulterOptions(
       ...base?.limits,
       ...override?.limits,
     },
-  };
-}
-
-function splitPath(path: string) {
-  return path.split("/").filter(Boolean);
-}
-
-function comparePath(a: string, b: string): number {
-  const aParts = splitPath(a);
-  const bParts = splitPath(b);
-
-  const len = Math.max(aParts.length, bParts.length);
-  for (let i = 0; i < len; i++) {
-    const aPart = aParts[i] ?? "";
-    const bPart = bParts[i] ?? "";
-
-    const isADynamic = aPart.startsWith(":");
-    const isBDynamic = bPart.startsWith(":");
-
-    if (isADynamic !== isBDynamic) {
-      return isADynamic ? 1 : -1;
-    }
-
-    const cmp = aPart.localeCompare(bPart);
-    if (cmp !== 0) return cmp;
-  }
-
-  return 0;
-}
-
-function withWsErrorHandler<T extends (...args: any[]) => Promise<any> | any>(
-  handler: T,
-  errorHandler: (err: unknown) => Promise<void> | void,
-): (...args: Parameters<T>) => Promise<void> {
-  return async (...args) => {
-    try {
-      await handler(...args);
-    } catch (err) {
-      await errorHandler(err);
-    }
   };
 }
 
@@ -175,8 +122,6 @@ class Logger implements ILogger {
 export class AppOptions {
   routerPrefix: string = "/api";
   wsPrefix: string = "";
-  setTimeout?: number;
-  gracefulShutdownTimeout?: number;
 }
 
 export class WsOptions {
@@ -190,8 +135,6 @@ export class WsOptions {
 
 export class App {
   #app: FastifyInstance;
-  // #server: http.Server;
-  #connections: Set<Socket>;
   #mediatorMap: MediatorMap = new Map();
   #eventMap: EventMap = new Map();
   #mediatorPipeLine?: {
@@ -200,11 +143,6 @@ export class App {
   };
   #isAuthGuardEnabled: boolean;
   #defaultGuard?: GuardMiddleware;
-  #controllers?: Newable[];
-  #swagger?: {
-    metaDataFn: () => ApiDocMetaData[];
-    options: OpenApiOptions;
-  };
   #multerDefaults?: MulterOptions;
   logger: ILogger;
   env!: IEnv;
@@ -213,9 +151,10 @@ export class App {
 
   private constructor(options: AppOptions) {
     this.options = options;
-    this.#app = fastify().register(cookie);
+    this.#app = fastify()
+      .withTypeProvider<TypeBoxTypeProvider>()
+      .register(cookie);
     this.#isAuthGuardEnabled = false;
-    this.#connections = new Set<Socket>();
     this.logger = new Logger();
     this.serviceContainer = new Container({
       autobind: true,
@@ -319,82 +258,7 @@ export class App {
     return this;
   }
 
-  enableSwagger(options: OpenApiOptions) {
-    options.sortBy = options.sortBy ?? "route";
-
-    const metaDataFn = () => {
-      const apiDocs: ApiDocMetaData[] = [];
-
-      this.#controllers?.forEach((c) => {
-        const c_prototype = c.prototype;
-        const c_path = Reflect.getMetadata(CONTROLLER_METADATA.PATH, c);
-
-        Object.getOwnPropertyNames(c_prototype).forEach((handlerName) => {
-          if (handlerName === "constructor") return;
-
-          const handler = c_prototype[handlerName];
-          if (typeof handler !== "function") return;
-
-          const routeMethod: RouteDefinition["method"] = Reflect.getMetadata(
-            ROUTE_METHOD,
-            c_prototype,
-            handlerName,
-          );
-          const routePath = Reflect.getMetadata(
-            ROUTE_PATH,
-            c_prototype,
-            handlerName,
-          );
-
-          if (!routeMethod || !routePath) return;
-
-          const apiDoc: ApiDocOptions =
-            Reflect.getMetadata(APIDOC_KEY, c_prototype, handlerName) || {};
-
-          apiDocs.push({
-            controllerName: c.name,
-            handlerName,
-            methodName: routeMethod,
-            path:
-              `${this.options.routerPrefix}/${c_path}/${routePath}`
-                .replace(/\/+/g, "/")
-                .replace(/\/$/, "") || "/",
-            apiDoc,
-          });
-        });
-      });
-
-      const methodOrder = ["GET", "POST", "PUT", "DELETE"];
-      if (options.sortBy === "method") {
-        apiDocs.sort((a, b) => {
-          const orderA = methodOrder.indexOf(a.methodName.toUpperCase());
-          const orderB = methodOrder.indexOf(b.methodName.toUpperCase());
-          return orderA - orderB;
-        });
-      } else if (options.sortBy === "route") {
-        apiDocs.sort((a, b) => {
-          const pathCmp = comparePath(a.path, b.path);
-          if (pathCmp !== 0) return pathCmp;
-
-          const orderA = methodOrder.indexOf(a.methodName.toUpperCase());
-          const orderB = methodOrder.indexOf(b.methodName.toUpperCase());
-          return (orderA === -1 ? 99 : orderA) - (orderB === -1 ? 99 : orderB);
-        });
-      }
-
-      return apiDocs;
-    };
-
-    this.#swagger = {
-      metaDataFn,
-      options,
-    };
-    return this;
-  }
-
   mapController(controllers: Newable<any>[]) {
-    this.#controllers = controllers;
-
     this.#app.addHook("preHandler", async (req) => {
       req.container = this.#createRequestContainer();
     });
@@ -463,13 +327,30 @@ export class App {
 
             app.addHook("preHandler", async (req, reply) => {
               for (const m of [...classMiddleware, ...route.middleware]) {
-                return (await resolveMiddleware(req.container, m))(req, reply);
+                await (
+                  await resolveMiddleware(req.container, m)
+                )(req, reply);
               }
             });
 
-            app[route.method](route.path, async (req, reply) => {
-              const instance = await req.container.getAsync(c);
-              await instance[route.handlerName](req, reply);
+            let schema: any = {};
+            const schemaMetadata = Reflect.getMetadata(
+              SCHEMA_KEY,
+              c.prototype,
+              route.handlerName,
+            );
+            if (schemaMetadata) {
+              schema = schemaMetadata;
+            }
+
+            app.route({
+              method: route.method,
+              url: route.path,
+              schema,
+              handler: async (req, reply) => {
+                const instance = await req.container.getAsync(c);
+                await instance[route.handlerName](req, reply);
+              },
             });
           };
           app.register(routePlugin);
@@ -651,34 +532,6 @@ export class App {
   run(port?: number) {
     port = port ?? 3000;
 
-    // if (this.#swagger) {
-    //   let swaggerPath: string;
-    //   const { title, version, path, servers } = this.#swagger.options;
-    //   try {
-    //     const spec = generateOpenApiSpec(
-    //       this.#swagger.metaDataFn(),
-    //       title,
-    //       version,
-    //       servers,
-    //     );
-    //     swaggerPath = path ?? "/docs";
-    //     this.#app.use(swaggerPath, swaggerUI.serve, swaggerUI.setup(spec));
-    //     this.logger.info(
-    //       `Swagger UI available at http://localhost:${port}${swaggerPath}`,
-    //     );
-    //   } catch (err) {
-    //     this.logger.warn(`Swagger UI failed to initialize ${err}`);
-    //   }
-    // }
-
-    // if (this.#exceptionHandler) {
-    //   this.useMiddleware(this.#useExceptionMiddleware);
-    // }
-    // if (this.#notFoundHandler) {
-    //   this.useMiddleware(this.#useNotFoundMiddleware);
-    // }
-    //
-
     this.#app.listen({ port }, (err) => {
       if (err) {
         console.log(err);
@@ -686,18 +539,6 @@ export class App {
         this.logger.info(`Listening on port ${port}`);
       }
     });
-
-    // this.#server.on("connection", (conn) => {
-    //   this.#connections.add(conn);
-    //   conn.on("close", () => {
-    //     this.#connections.delete(conn);
-    //   });
-    // });
-    //
-    // this.#server.setTimeout(this.options.setTimeout);
-    //
-    // process.on("SIGINT", this.#gracefulShutdown.bind(this));
-    // process.on("SIGTERM", this.#gracefulShutdown.bind(this));
   }
 
   #bindLogger() {
@@ -705,20 +546,4 @@ export class App {
       .rebindSync<ILogger>(APP_TOKEN.ILogger)
       .toConstantValue(this.logger);
   }
-
-  // #gracefulShutdown() {
-  //   this.logger.info("Starting graceful shutdown...");
-  //
-  //   this.#server?.close(() => {
-  //     this.logger.info("Closed server, exiting process.");
-  //     setTimeout(() => {
-  //       process.exit(0);
-  //     }, 1000);
-  //   });
-  //
-  //   setTimeout(() => {
-  //     this.logger.info("Forcing close of connections...");
-  //     this.#connections.forEach((conn) => conn.destroy());
-  //   }, this.options.gracefulShutdownTimeout ?? 30_000);
-  // }
 }
