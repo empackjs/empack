@@ -28,7 +28,7 @@ import cookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
 import multipart from "@fastify/multipart";
 import { SCHEMA_KEY } from "../controller/decorator/schema";
-import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -152,6 +152,7 @@ export class App {
   private constructor(options: AppOptions) {
     this.options = options;
     this.#app = fastify()
+      .setValidatorCompiler(TypeBoxValidatorCompiler)
       .withTypeProvider<TypeBoxTypeProvider>()
       .register(cookie);
     this.#isAuthGuardEnabled = false;
