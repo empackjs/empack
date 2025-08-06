@@ -5,6 +5,8 @@ import {
   AppOptions,
   EmpackMiddleware,
   EmpackMiddlewareFunction,
+  EventHandler,
+  EventHook,
   WsOptions,
 } from "./types/index";
 import { ContainerModule } from "../di/index";
@@ -42,6 +44,84 @@ import { Env } from "./env";
 declare module "fastify" {
   interface FastifyRequest {
     container: Container;
+  }
+}
+
+function castToType(value: string, type: string): any {
+  try {
+    switch (type) {
+      case "number":
+        return Number(value);
+      case "boolean":
+        return value === "true";
+      case "array":
+      case "object":
+        return JSON.parse(value);
+      case "string":
+      default:
+        return value;
+    }
+  } catch {
+    return value;
+  }
+}
+
+function normalizeMultipartDataBySchema(
+  data: Record<string, any>,
+  schema: Record<string, any>,
+): Record<string, any> {
+  const result: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    const propSchema = schema[key];
+
+    if (!propSchema) {
+      result[key] = value;
+      continue;
+    }
+
+    const isFile = propSchema.isFile;
+    if (isFile) {
+      result[key] = value;
+      continue;
+    }
+
+    if (propSchema.type === "array") {
+      const items = Array.isArray(value) ? value : [value];
+      result[key] = items.map((item) => {
+        if (item?.value != null && propSchema.items?.type) {
+          return castToType(item.value, propSchema.items.type);
+        }
+        return item;
+      });
+      continue;
+    }
+
+    if (typeof value === "object" && "value" in value) {
+      result[key] = castToType(value.value, propSchema.type);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+function normalizeMultipartProperties(properties: Record<string, any>) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for (const [_, value] of Object.entries(properties)) {
+    if ((value as any).type === "array") {
+      const items = (value as any).items;
+      if (items?.isFile) {
+        items.type = "string";
+        items.format = "binary";
+      }
+    } else {
+      if ((value as any)?.isFile) {
+        (value as any).type = "string";
+        (value as any).format = "binary";
+      }
+    }
   }
 }
 
@@ -105,6 +185,7 @@ export class App {
   #isAuthGuardEnabled: boolean;
   #defaultGuard?: GuardMiddleware;
   #multerDefaults?: MulterOptions;
+  #appMiddleware: EmpackMiddleware[] = [];
   env!: IEnv<any>;
   serviceContainer: Container;
   options: AppOptions;
@@ -284,10 +365,21 @@ export class App {
                 limits,
                 onFile: () => {},
               });
+
+              app.addHook("preValidation", async (req) => {
+                req.body = normalizeMultipartDataBySchema(
+                  req.body as any,
+                  (req.routeOptions.schema?.body as any).properties,
+                );
+              });
             }
 
             app.addHook("preHandler", async (req, reply) => {
-              for (const m of [...classMiddleware, ...route.middleware]) {
+              for (const m of [
+                ...this.#appMiddleware,
+                ...classMiddleware,
+                ...route.middleware,
+              ]) {
                 const fn = await resolveMiddleware(req.container, m);
                 await fn(req, reply);
                 if (reply.sent) return;
@@ -302,6 +394,12 @@ export class App {
             );
             if (schemaMetadata) {
               schema = schemaMetadata;
+              if (routeMulterOptions && schema.body?.properties) {
+                normalizeMultipartProperties(schema.body.properties);
+                schema.consumes = ["multipart/form-data"];
+              } else {
+                schema.consumes = ["application/json"];
+              }
             }
 
             app.route({
@@ -397,9 +495,13 @@ export class App {
     return this;
   }
 
-  useMiddleware(middleware: EmpackMiddlewareFunction) {
-    this.#app.addHook("onRequest", middleware);
+  useMiddleware(middleware: EmpackMiddleware) {
+    this.#appMiddleware.push(middleware);
     return this;
+  }
+
+  addHook(event: EventHook, handler: EventHandler) {
+    this.#app.addHook(event, handler);
   }
 
   enableAuthGuard(defaultGuard?: GuardMiddleware) {

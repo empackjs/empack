@@ -7,6 +7,8 @@ export type {
   EmpackMiddlewareFunction,
   AppOptions,
   WsOptions,
+  EventHook,
+  EventHandler,
 } from "./types/index";
 export { App } from "./app";
 export type { BaseLogger as ILogger } from "pino";

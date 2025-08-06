@@ -21,21 +21,35 @@ export const Put = createRouteDecorator("put");
 export const Delete = createRouteDecorator("delete");
 export const Patch = createRouteDecorator("patch");
 
-// function simplifyFilesMap(
-//   filesMap: Record<string, any[]>,
-// ): Record<string, any[]> {
-//   return Object.fromEntries(
-//     Object.entries(filesMap).map(([key, fileArray]) => [
-//       key,
-//       fileArray.map((file) => ({
-//         filename: file.filename,
-//         mimetype: file.mimetype,
-//         file: file.file,
-//         toBuffer: file.toBuffer,
-//       })),
-//     ]),
-//   );
-// }
+function normalizeMultipartBody(reqBody: Record<string, any>) {
+  const cleanedBody: Record<string, any> = {};
+  let file: any = null;
+  const files: any[] = [];
+
+  for (const [key, value] of Object.entries(reqBody)) {
+    if (Array.isArray(value)) {
+      const fileItems = value.filter((v) => v?.type === "file");
+      const nonFileItems = value.filter((v) => v?.type !== "file");
+
+      if (fileItems.length > 0) files.push(...fileItems);
+      if (nonFileItems.length > 0) cleanedBody[key] = nonFileItems;
+
+      continue;
+    }
+    if (value?.type === "file") {
+      if (!file) file = value;
+      else files.push(value);
+      continue;
+    }
+    cleanedBody[key] = value;
+  }
+
+  return {
+    body: cleanedBody,
+    file,
+    files: files.length > 0 ? files : undefined,
+  };
+}
 
 function applyWithData(reply: FastifyReply, withData: ResponseWith = {}) {
   if (withData.headers) {
@@ -64,6 +78,9 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
 
           const contentType = req.headers["content-type"] || "";
           const isMultipart = contentType.includes("multipart/form-data");
+          const { body, file, files } = isMultipart
+            ? normalizeMultipartBody(req.body as any)
+            : {};
 
           const args: any[] = [];
           for (let i = 0; i < original.length; i++) {
@@ -78,15 +95,6 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
             switch (meta.source) {
               case "body":
                 if (isMultipart) {
-                  const body = Object.fromEntries(
-                    Object.entries(req.body as any)
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      .filter(([_, v]) => {
-                        if (Array.isArray(v)) return v[0]?.type !== "file";
-                        return (v as any)?.type !== "file";
-                      })
-                      .map(([key, prop]) => [key, (prop as any).value]),
-                  );
                   rawValue = body;
                 } else {
                   rawValue = req.body;
@@ -104,52 +112,15 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
               case "reply":
                 rawValue = reply;
                 break;
+              case "file":
+                rawValue = file;
+                break;
               case "files":
-                rawValue = [];
-                if (isMultipart) {
-                  const filesOnly = Object.fromEntries(
-                    Object.entries(req.body as any)
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      .filter(([_, v]) => {
-                        if (Array.isArray(v)) return v[0]?.type === "file";
-                        return (v as any)?.type === "file";
-                      })
-                      .map(([key, v]) => {
-                        const files = Array.isArray(v) ? v : [v];
-                        return [key, files];
-                      }),
-                  );
-                  rawValue = filesOnly;
-                }
+                rawValue = files;
                 break;
               case "multipart":
-                rawValue = {};
                 if (isMultipart) {
-                  const body = Object.fromEntries(
-                    Object.entries(req.body as any)
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      .filter(([_, v]) => {
-                        if (Array.isArray(v)) return v[0]?.type !== "file";
-                        return (v as any)?.type !== "file";
-                      })
-                      .map(([key, prop]) => [key, (prop as any).value]),
-                  );
-                  const filesOnly = Object.fromEntries(
-                    Object.entries(req.body as any)
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      .filter(([_, v]) => {
-                        if (Array.isArray(v)) return v[0]?.type === "file";
-                        return (v as any)?.type === "file";
-                      })
-                      .map(([key, v]) => {
-                        const files = Array.isArray(v) ? v : [v];
-                        return [key, files];
-                      }),
-                  );
-                  rawValue = {
-                    ...body,
-                    ...filesOnly,
-                  };
+                  rawValue = req.body;
                 }
                 break;
               case "cookie":

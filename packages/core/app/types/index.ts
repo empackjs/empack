@@ -29,3 +29,17 @@ export type WsOptions = {
     reply: FastifyReply,
   ) => void;
 };
+
+export type EventHook =
+  | "onRequest"
+  | "preParsing"
+  | "preValidation"
+  | "preHandler"
+  | "preSerialization"
+  | "onSend"
+  | "onResponse";
+
+export type EventHandler = (
+  req: FastifyRequest,
+  reply: FastifyReply,
+) => void | Promise<void>;

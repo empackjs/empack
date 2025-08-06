@@ -19,6 +19,7 @@ import {
   RegisterRes,
 } from "../contract/auth/register";
 import { AsyncTestMiddleware, ReplyTestMiddleware } from "../middleware";
+import { UploadFile, UploadFileSchema } from "../contract/auth/uploadfile";
 
 @Guard("none")
 @Controller("/auth")
@@ -41,10 +42,19 @@ export class AuthController {
     });
   }
 
+  @Schema({
+    tags: ["Auth"],
+    description: "upload file",
+    body: UploadFileSchema,
+  })
   @Post("/file")
   @UseMultipart()
-  async file(@FromMultipart() multi: any) {
-    console.log(multi);
+  async uploadFile(@FromMultipart() multi: UploadFile, @FromBody() body: any) {
+    const { userId, photo, photos } = multi;
+    console.log(userId);
+    console.log(photo);
+    console.log(photos);
+    console.log(body);
     return Responses.OK("ok");
   }
 
