@@ -1,11 +1,13 @@
 import path from "path";
 import {
+  APP_TOKEN,
   Controller,
   FromBody,
   FromMultipart,
   FromParam,
   Get,
   Guard,
+  Inject,
   Post,
   Responses,
   Schema,
@@ -20,10 +22,38 @@ import {
 } from "../contract/auth/register";
 import { AsyncTestMiddleware, ReplyTestMiddleware } from "../middleware";
 import { UploadFile, UploadFileSchema } from "../contract/auth/uploadfile";
+import { JwTokenHelper } from "../../../packages/utils/jwt";
+import { JWT_TOKEN } from "../jwt";
+import {
+  LoginBody,
+  LoginBodySchema,
+  LoginRes,
+  LoginResSchema,
+} from "../contract/auth/login";
 
-@Guard("none")
+// @Guard("none")
 @Controller("/auth")
 export class AuthController {
+  constructor(@Inject(JWT_TOKEN) private jwt: JwTokenHelper) {}
+
+  @Guard("none")
+  @Schema({
+    tags: ["Auth"],
+    description: "login",
+    body: LoginBodySchema,
+    response: {
+      [Status.OK]: LoginResSchema,
+    },
+  })
+  @Post("/login")
+  async login(@FromBody() body: LoginBody) {
+    const { account, password } = body;
+    const token = this.jwt.generateToken({
+      account,
+    });
+    return Responses.OK<LoginRes>({ token });
+  }
+
   @Schema({
     tags: ["Auth"],
     description: "會員註冊",

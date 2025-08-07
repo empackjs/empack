@@ -19,6 +19,7 @@ import { MEDIATOR_KEY } from "../mediator/decorator";
 import {
   CONTROLLER_METADATA,
   GUARD_KEY,
+  resolveResponses,
   ROUTE_METADATA_KEY,
   WSCONTROLLER_METADATA,
 } from "../controller/decorator";
@@ -349,10 +350,10 @@ export class App {
               }
               if (guard !== "none") {
                 app.addHook("preHandler", async (req, reply) => {
-                  return (await resolveMiddleware(req.container, guard))(
-                    req,
-                    reply,
-                  );
+                  const guardResult = (
+                    await resolveMiddleware(req.container, guard)
+                  )(req);
+                  return await resolveResponses(guardResult, reply);
                 });
               }
             }
@@ -388,7 +389,8 @@ export class App {
                 ...route.middleware,
               ]) {
                 const fn = await resolveMiddleware(req.container, m);
-                await fn(req, reply);
+                const middlewareResult = await fn(req);
+                await resolveResponses(middlewareResult, reply);
                 if (reply.sent) return;
               }
             });
@@ -458,10 +460,10 @@ export class App {
           }
           if (guard !== "none") {
             app.addHook("preHandler", async (req, reply) => {
-              return (await resolveMiddleware(req.container, guard))(
-                req,
-                reply,
-              );
+              const guardResult = (
+                await resolveMiddleware(req.container, guard)
+              )(req);
+              return await resolveResponses(guardResult, reply);
             });
           }
         }

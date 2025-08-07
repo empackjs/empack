@@ -1,10 +1,11 @@
 import path from "path";
 import { App } from "../../packages/core";
-import { jwtGuard } from "../../packages/utils/jwt";
+import { jwtGuard, JwTokenHelper } from "../../packages/utils/jwt";
 import { AuthController } from "./controller/auth.controller";
 import { ChatGateway } from "./controller/chat.websocket";
 import dotenv from "dotenv";
 import { ErrorHandler, NotFoundHandler } from "./contract/error-handling";
+import { JWT_TOKEN } from "./jwt";
 
 export type Env = {
   PORT: string;
@@ -33,9 +34,15 @@ app.enableSwagger({
     ],
   },
 });
+app.addConstant(
+  JWT_TOKEN,
+  new JwTokenHelper({
+    secret: "secret",
+  }),
+);
 app.enableAuthGuard(jwtGuard("secret"));
 app.mapController([AuthController]);
 app.enableWebSocket([ChatGateway]);
-app.setErrorHandler(ErrorHandler)
-app.setNotFoundHandler(NotFoundHandler)
+app.setErrorHandler(ErrorHandler);
+app.setNotFoundHandler(NotFoundHandler);
 app.run(parseInt(app.env.get("PORT")));

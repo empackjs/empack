@@ -7,11 +7,11 @@ import {
   FastifyRequest,
   FastifyServerOptions,
 } from "fastify";
+import { EmpackResponses } from "../../controller";
 
 export type EmpackMiddlewareFunction = (
   req: FastifyRequest,
-  reply: FastifyReply,
-) => void | Promise<void>;
+) => void | Promise<void> | EmpackResponses | Promise<EmpackResponses>;
 
 export type EmpackMiddleware =
   | EmpackMiddlewareFunction

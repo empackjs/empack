@@ -51,6 +51,31 @@ function normalizeMultipartBody(reqBody: Record<string, any>) {
   };
 }
 
+export function resolveResponses(response: any, reply: FastifyReply) {
+  if (response instanceof ResWith) {
+    applyWithData(reply, response.getWithData());
+  }
+  if (response instanceof JsonResponse) {
+    return reply.status(response.status).send(response.body);
+  }
+  if (response instanceof FileResponse) {
+    reply.header(
+      "Content-Disposition",
+      `attachment; filename="${response.fileName}"`,
+    );
+    return reply.send(fs.createReadStream(response.filePath));
+  }
+  if (response instanceof BufferResponse) {
+    return reply.send(response.data);
+  }
+  if (response instanceof RedirectResponse) {
+    return reply.redirect(response.url, response.status);
+  }
+  if (response !== undefined) {
+    return reply.send(response);
+  }
+}
+
 function applyWithData(reply: FastifyReply, withData: ResponseWith = {}) {
   if (withData.headers) {
     reply.headers(withData.headers);
@@ -137,28 +162,7 @@ function createRouteDecorator(method: RouteDefinition["method"]) {
           }
 
           const result = await original.apply(this, args);
-          if (result instanceof ResWith) {
-            applyWithData(reply, result.getWithData());
-          }
-          if (result instanceof JsonResponse) {
-            return reply.status(result.status).send(result.body);
-          }
-          if (result instanceof FileResponse) {
-            reply.header(
-              "Content-Disposition",
-              `attachment; filename="${result.fileName}"`,
-            );
-            return reply.send(fs.createReadStream(result.filePath));
-          }
-          if (result instanceof BufferResponse) {
-            return reply.send(result.data);
-          }
-          if (result instanceof RedirectResponse) {
-            return reply.redirect(result.url, result.status);
-          }
-          if (result !== undefined) {
-            return reply.send(result);
-          }
+          resolveResponses(result, reply);
         } catch (err) {
           throw err as Error;
         }

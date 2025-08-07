@@ -4,6 +4,7 @@ export type {
   Cookie,
   WebSocketContext,
   SchemaMetadata,
+  EmpackResponses,
   BufferLike,
 } from "./types/index";
 export type { IWebSocket } from "./interfaces/index";

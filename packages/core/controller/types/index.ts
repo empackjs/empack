@@ -1,6 +1,20 @@
 import { EmpackMiddleware } from "../../app/types/index";
 import { Newable } from "inversify";
 import { CookieSerializeOptions as CookieOptions } from "@fastify/cookie";
+import {
+  BufferResponse,
+  FileResponse,
+  JsonResponse,
+  RedirectResponse,
+  Responses,
+} from "../responses";
+
+export type EmpackResponses =
+  | Responses
+  | JsonResponse
+  | FileResponse
+  | BufferResponse
+  | RedirectResponse;
 
 export type GuardMiddleware = EmpackMiddleware | "none";
 

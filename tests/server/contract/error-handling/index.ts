@@ -35,6 +35,7 @@ export const ErrorHandler = (
     return;
   }
 
+  console.log(err.stack);
   reply.code(500).send({
     errorCode: ERROR_CODES.INTERNAL_SERVER_ERROR,
     message: "Internal Server Error",

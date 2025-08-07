@@ -1,4 +1,5 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyRequest } from "fastify";
+import { EmpackResponses } from "../../controller";
 
 export interface IEnv<T> {
   get(key: keyof T): string;
@@ -6,5 +7,7 @@ export interface IEnv<T> {
 }
 
 export interface IEmpackMiddleware {
-  use(req: FastifyRequest, reply: FastifyReply): void | Promise<void>;
+  use(
+    req: FastifyRequest,
+  ): void | Promise<void> | EmpackResponses | Promise<EmpackResponses>;
 }
