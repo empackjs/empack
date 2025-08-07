@@ -7,7 +7,7 @@ export type MulterOptions = {
   };
 };
 
-export type MulterFile = {
+export type FilePart = {
   filename: string;
   mimetype: string;
   file: Readable;

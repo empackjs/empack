@@ -1,7 +1,7 @@
 export { Multipart } from "@fastify/multipart";
 
-export type { MulterOptions, MulterFile } from "./types";
+export type { MulterOptions, FilePart } from "./types";
 
 export { UseMultipart } from "./decorator";
 
-export { FilePart as FileType } from "./multer";
+export { FileType } from "./multer";
