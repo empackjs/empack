@@ -304,6 +304,7 @@ export class App {
   enableSwagger(options: SwaggerOptions & FastifySwaggerUiOptions) {
     this.#app.register(swagger, options);
     this.#app.register(swaggerUI, options);
+    return this;
   }
 
   mapController(controllers: Newable<any>[]) {
