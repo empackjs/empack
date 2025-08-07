@@ -455,7 +455,7 @@ export class App {
           const guard: GuardMiddleware = classGuard ?? this.#defaultGuard;
           if (!guard) {
             throw new Error(
-              `AuthGuard is enabled, without default guard ${c.name} or ${c.name} must define a @Guard decorator`,
+              `AuthGuard is enabled, without default guard ${c.name} must define a @Guard decorator`,
             );
           }
           if (guard !== "none") {

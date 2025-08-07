@@ -77,13 +77,19 @@ export function resolveResponses(response: any, reply: FastifyReply) {
 }
 
 function applyWithData(reply: FastifyReply, withData: ResponseWith = {}) {
+  if (withData.clearCookie) {
+    for (const cookieName of withData.clearCookie) {
+      reply.clearCookie(cookieName);
+    }
+  }
+
   if (withData.headers) {
     reply.headers(withData.headers);
   }
 
   if (withData.cookies) {
     for (const cookie of withData.cookies) {
-      reply.cookie(cookie.key, cookie.value, cookie.options);
+      reply.cookie(cookie.name, cookie.value, cookie.options);
     }
   }
 }

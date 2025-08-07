@@ -19,12 +19,13 @@ export type EmpackResponses =
 export type GuardMiddleware = EmpackMiddleware | "none";
 
 export type ResponseWith = {
+  clearCookie?: string[];
   cookies?: Cookie[];
   headers?: Record<string, string>;
 };
 
 export type Cookie = {
-  key: string;
+  name: string;
   value: string;
   options: CookieOptions;
 };

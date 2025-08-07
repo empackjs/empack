@@ -42,6 +42,10 @@ export abstract class ResWith {
         ...(data.headers || {}),
       },
       cookies: [...(this.#withData.cookies || []), ...(data.cookies || [])],
+      clearCookie: [
+        ...(this.#withData.clearCookie || []),
+        ...(data.clearCookie || []),
+      ],
     };
     return this;
   }
