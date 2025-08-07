@@ -43,26 +43,6 @@ class MyController {
 }
 ```
 
-### Custom Logger: `setLogger()`
-
-You can inject your own logger that conforms to the `ILogger` interface. It will be auto-bound to the container:
-
-```ts
-App.createBuilder()
-  .setLogger(myCustomLogger)
-
-@Controller("/")
-class MyController {
-  constructor(@inject(APP_TOKEN.ILogger) private logger: ILogger) {}
-
-  @Get("/")
-  myRoute() {
-    this.logger.debug("my log")
-    return Responses.OK("log")
-  }
-}
-```
-
 ### Serve Static Files: `useStatic()`
 
 Serve frontend assets or any public directory:
@@ -88,19 +68,14 @@ Gives you full access to the underlying Express app for low-level customization:
 
 ```ts
 app.useExtension((app) => {
-  app.disable("x-powered-by");
+  app.regisger(...)
 });
 ```
 
-### Enable CORS and Body Parsers
-
-Common middleware made simple:
+### Enable CORS
 
 ```ts
-app
-  .useCors({ origin: "*" })
-  .useJsonParser()
-  .useUrlEncodedParser(); // default is `extended: true`
+app.useCors({ origin: "*" })
 ```
 
 ### Custom Exception & Not Found Handlers
@@ -109,48 +84,54 @@ Handle uncaught errors and undefined routes globally:
 
 ```ts
 app
-  .setExceptionHandler((err, req) => {
-    statusCode: 500,
-    body: { error: err.message },
-  })
-  .setNotFoundHandler((req) => {
-    statusCode: 404,
-    body: { error: "Route Not Found" },
+  .setErrorHandler((err, req, reply) => {
+      //...
+    })
+  .setNotFoundHandler((req, reply) => {
+     //...
   });
 ```
-
->[!NOTE]
-If you provide a handler via `setExceptionHandler()` or `setNotFoundHandler()`,
-Empack will automatically register the corresponding middleware internally.
-If you don’t, you’re free to define your own handlers using `useMiddleware()`.
-
->[!WARNING]
-However, we do not recommend registering a custom NotFound handler via `useMiddleware()` alone.
-Doing so may cause it to be executed before the exception handler, which can lead to unexpected behavior — such as errors being swallowed by the 404 response.
-To avoid this, prefer using `setNotFoundHandler()` so Empack can ensure proper middleware order.
 
 ### Minimal Example
 
 ```ts
-App.createBuilder((opt) => {
-  opt.routerPrefix = "/api";
-  opt.setTimeout = 30_000;
-})
-  .setDotEnv()
-  .setLogger(new Logger())
-  .useCors({ origin: "*" })
-  .useJsonParser()
-  .useUrlEncodedParser()
-  .useHeaders({ "X-Powered-By": "Empack" })
-  .useStatic("./public")
-  .setExceptionHandler((err, _req) => {
-    statusCode: 500,
-    body: { error: err.message },
-  })
-  .setNotFoundHandler((req) => {
-    statusCode: 404,
-    body: { error: `${req.method} ${req.url} Not Found` },
-  })
-  .mapController([MyController])
-  .run(3000);
+export type Env = {
+  PORT: string;
+  DOWNLOAD_PATH: string;
+};
+
+dotenv.config({
+  path: path.join(__dirname, ".env.example"),
+});
+
+const app = App.createBuilder();
+app.setDotEnv();
+app.enableSwagger({
+  routePrefix: "/docs",
+  openapi: {
+    info: {
+      title: "Empack",
+      description: "Empack API DOCS",
+      version: "1.0.0",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "local",
+      },
+    ],
+  },
+});
+app.addConstant(
+  JWT_TOKEN,
+  new JwTokenHelper({
+    secret: "secret",
+  }),
+);
+app.enableAuthGuard(jwtGuard("secret"));
+app.mapController([AuthController]);
+app.enableWebSocket([ChatGateway]);
+app.setErrorHandler(ErrorHandler);
+app.setNotFoundHandler(NotFoundHandler);
+app.run(parseInt(app.env.get("PORT")));
 ```
