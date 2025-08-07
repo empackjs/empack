@@ -25,7 +25,13 @@ import {
 import { APP_TOKEN } from "../token";
 import { MulterOptions } from "../multer/types";
 import { MULTER_KEY } from "../multer/decorator";
-import fastify, { FastifyBaseLogger, FastifyInstance } from "fastify";
+import fastify, {
+  FastifyBaseLogger,
+  FastifyError,
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 import cookie from "@fastify/cookie";
 import fastifyStatic, { FastifyStaticOptions } from "@fastify/static";
 import multipart from "@fastify/multipart";
@@ -535,6 +541,24 @@ export class App {
 
   useExtension(fn: (app: FastifyInstance) => void) {
     fn(this.#app);
+    return this;
+  }
+
+  setErrorHandler(
+    handler: (
+      err: FastifyError,
+      req: FastifyRequest,
+      reply: FastifyReply,
+    ) => void | Promise<void>,
+  ) {
+    this.#app.setErrorHandler(handler);
+    return this;
+  }
+
+  setNotFoundHandler(
+    handler: (req: FastifyRequest, reply: FastifyReply) => void | Promise<void>,
+  ) {
+    this.#app.setNotFoundHandler(handler);
     return this;
   }
 
