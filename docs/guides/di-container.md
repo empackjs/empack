@@ -45,29 +45,29 @@ Empack supports three lifecycle scopes when registering or defining injectable c
 ### 1. Constructor Injection with Decorators
 
 ```ts
-@injectable()
+@Injectable()
 export class UserService {
-  constructor(@inject(CONFIG_TOKEN) private config: Config) {}
+  constructor(@Inject(CONFIG_TOKEN) private config: Config) {}
 }
 ```
-Add `@injectable()` on your class, and use `@inject(...)` to specify **token or class** in the constructor.
+Add `@Injectable()` on your class, and use `@Inject(...)` to specify **token or class** in the constructor.
 
 ### 2. Auto-binding Support
 
 Empack’s container enables `autobind: true` by default. That means:
 
-If a class is decorated with `@injectable()` and it's injected into another service/controller
+If a class is decorated with `@Injectable()` and it's injected into another service/controller
 the container will automatically resolve it, even if you didn’t bind it manually
 
 ```ts
-@injectable()
+@Injectable()
 export class ConfigService {
   getAppName() {
     return "Empack App";
   }
 }
 
-@injectable()
+@Injectable()
 export class AppService {
   constructor(private config: ConfigService) {}
 
@@ -112,7 +112,7 @@ Empack automatically treats the following classes as transient-scoped, meaning t
 * `@Subscribe()` – for mediator Event handlers
 * `@WsController()` – for WebSocket route controllers
 
-No need to manually annotate them with `@injectable()`.
+No need to manually annotate them with `@Injectable()`.
 This makes request-level isolation the default for all entry points, with no extra ceremony.
 
 ## Pre-registered Tokens in Empack
@@ -132,7 +132,7 @@ You can override these via `setLogger(...)`, `setDotEnv()`, etc.
 You can combine DI + middleware to inject a per-request CurrentUser:
 
 ```ts
-@injectable("request")
+@Injectable("request")
 export class CurrentUser {
   id: string;
   role: string;
@@ -142,12 +142,11 @@ export class CurrentUser {
 In a middleware:
 
 ```ts
-export class AuthMiddleware implements EmpackMiddleware {
+export class AuthMiddleware implements IEmpackMiddleware {
   constructor(private currentUser: CurrentUser) {}
 
-  async use(req, res, next) {
+  async use(req: FastifyRequest) {
     this.currentUser.id = req.headers["x-user-id"];
-    next();
   }
 }
 ```

@@ -1,6 +1,6 @@
 # Multer
 
-Empack provides first-class integration with [Multer](https://github.com/expressjs/multer) to handle file uploads via a simple decorator-based API.
+Empack provides first-class integration with [@fastify/multipart](https://github.com/fastify/fastify-multipart) to handle file uploads via a simple decorator-based API.
 Instead of registering multer manually for each route, you can simply use the `@UseMultipart()` decorator to enable upload support on any controller method.
 
 ## Basic Usage
@@ -9,11 +9,8 @@ Instead of registering multer manually for each route, you can simply use the `@
 
 ```ts
 @Post("/upload")
-@UseMultipart({
-  type: "single",
-  name: "avatar",
-})
-uploadAvatar(@FromFile() file: MulterFile) {
+@UseMultipart()
+uploadAvatar(@FromFile() file: FilePart) {
   return Responses.OK(`Uploaded: ${file.originalname}`);
 }
 ```
@@ -22,42 +19,9 @@ uploadAvatar(@FromFile() file: MulterFile) {
 
 ```ts
 @Post("/images")
-@UseMultipart({
-  type: "array",
-  name: "photos",
-  maxCount: 5,
-})
-uploadImages(@FromFiles() files: MulterFile[]) {
+@UseMultipart()
+uploadImages(@FromFiles() files: FilePart[]) {
   return Responses.OK(`Uploaded ${files.length} files.`);
-}
-```
-
-### 3. Handle multiple fields
-
-```ts
-@Post("/form")
-@UseMultipart({
-  type: "fields",
-  fields: [
-    { name: "avatar", maxCount: 1 },
-    { name: "documents", maxCount: 3 },
-  ],
-})
-uploadForm(
-    @FromFiles("avatar") avatar: MulterFile[], 
-    @FromFiles("documents") documents: MulterFile[]
-) {
-  return Responses.OK({ avatar: files.avatar?.[0], documents: files.documents });
-}
-```
-
-### 4. Disable file upload parsing
-
-```ts
-@Post("/text")
-@UseMultipart({ type: "none" })
-handleTextOnly() {
-  return Responses.OK("No file expected.");
 }
 ```
 
@@ -67,19 +31,15 @@ You can define global default Multer options using:
 
 ```ts
 app.setMulterDefaults({
-  storage: "memory",
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
-  },
+  limits?: {
+    fileSize?: number;
+    files?: number;
+  };
 });
 ```
 
 These defaults will be applied to all routes unless overridden.
 If a route is decorated with `@UseMultipart(...)`, its options will override the defaults for that specific route only.
-
->[!TIP]
-Global defaults are ideal for consistent config (e.g. always use memory storage),
-while per-route overrides give you flexibility when needed.
 
 ## About `@UseMultipart()` and `@FromMultipart()`
 
@@ -97,18 +57,12 @@ This means `@FromMultipart()` gives you a complete view of both form fields and 
 
 ```ts
 @Post("/profile")
-@UseMultipart({
-  type: "fields",
-  fields: [
-    { name: "avatar", maxCount: 1 },
-    { name: "documents", maxCount: 3 },
-  ],
-})
+@UseMultipart()
 updateProfile(
   @FromMultipart() body: {
     username: string;
-    avatar?: MulterFile[]; // For 'fields' type, even maxCount=1, this is still an array.
-    documents?: MulterFile[];
+    avatar?: FilePart;
+    documents?: FilePart[];
   },
 ) {
   return Responses.OK(body);
@@ -120,7 +74,7 @@ This will result in an injected object like:
 ```json
 {
   username: "Alice",
-  avatar: { originalname: "pic.png", ... },
-  documents: [{ originalname: "doc1.pdf", ... }, { originalname: "doc2.pdf", ... }]
+  avatar: { filename: "pic.png", ... },
+  documents: [{ filename: "doc1.pdf", ... }, { filename: "doc2.pdf", ... }]
 }
 ```

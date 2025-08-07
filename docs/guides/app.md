@@ -9,7 +9,7 @@ In this section, we’ll cover the remaining features of the App class in Empack
 * Multer
 * Mediator
 * WebSocket
-* OpenAPI (Swagger)
+* Schema Validation
 
 ## Additional App Configuration Guide
 

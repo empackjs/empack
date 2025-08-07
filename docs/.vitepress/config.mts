@@ -61,8 +61,8 @@ export default defineConfig({
                 link: "/guides/websocket",
               },
               {
-                text: "OpenAPI",
-                link: "/guides/open-api",
+                text: "Schema Validation",
+                link: "/guides/schema-validation",
               },
               {
                 text: "App",

@@ -1,5 +1,6 @@
 import {
   APP_TOKEN,
+  FastifyRequest,
   IEmpackMiddleware,
   IEnv,
   ILogger,

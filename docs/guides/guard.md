@@ -5,7 +5,7 @@ They are fully integrated with the DI container and can be applied globally, per
 
 ## What is a Guard?
 
-A guard is a middleware that runs **before** the controller handler and decides whether to allow or block the request.
+A guard is a middleware that runs **first** and decides whether to allow or block the request.
 Common use cases include:
 
 * Verifying JWT tokens
@@ -18,16 +18,16 @@ Since guards can be a class-based middleware, they support full Dependency Injec
 export class JwtGuard implements GuardMiddleware {
   constructor(private user: CurrentUser) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: FastifyRequest) {
     const token = req.headers.authorization?.replace("Bearer ", "");
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
+    if (!token) return Responses.ClientError.Unauthorized({ message: "Unauthorized" })
 
     try {
       const payload = jwt.verify(token, "secret");
       this.user.id = payload.sub;
       next();
     } catch {
-      res.status(401).json({ message: "Invalid token" });
+      return Responses.ClientError.Unauthorized({ message: "Invalid Token" })
     }
   }
 }
@@ -84,21 +84,17 @@ export class AdminController {
 When using guards, Empack applies middleware in the following order:
 
 ```
-App-level middleware (app.useMiddleware(...))
-        ↓
 Guard middleware (default or custom)
+        ↓
+App-level middleware (app.useMiddleware(...))
         ↓
 Controller-level middleware
         ↓
 Route-level middleware
         ↓
-Controller handler
+Route handler
 ```
-
->[!WARNING]
-Guard logic always runs **before** controller or route middleware,
-but **after** any global app middleware.
 
 >[!TIP]
 Avoid throwing exceptions inside guard classes unless you want them to be handled by the global ExceptionHandler.
-Prefer returning proper HTTP responses like `res.status(401).json(...)`.
+Prefer returning proper HTTP responses like `Responses.ClientError.Unauthorized(...)`.

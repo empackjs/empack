@@ -41,9 +41,8 @@ These decorators can be used in controller methods to access request body, query
 | `@FromBody()`       | Gets the request body (`req.body`)              |
 | `@FromQuery()`      | Gets a query parameter (`req.query`)            |
 | `@FromParam()`      | Gets a route parameter (`req.params`)           |
-| `@FromLocals()`     | Gets a value from `res.locals`                  |
-| `@FromReq()`        | Gets the raw Express `Request` object           |
-| `@FromRes()`        | Gets the raw Express `Response` object          |
+| `@FromReq()`        | Gets the raw Fastify `Request` object           |
+| `@FromReply()`      | Gets the raw Fastify `Reply` object             |
 | `@FromFile()`       | Gets a single uploaded file (`req.file`)        |
 | `@FromFiles()`      | Gets multiple uploaded files (`req.files`)      |
 | `@FromCookie()`     | Gets a cookie value (`req.cookies`)             |
@@ -65,12 +64,9 @@ getUser(
 To handle file uploads, use `@UseMultipart()` on the route and `@FromFile()` or `@FromFiles()` to access the uploaded content:
 
 ```ts
-@UseMultipart({
-  type: "single",
-  name: "photo"
-})
+@UseMultipart()
 @Post("/file")
-postFile(@FromFile() photo: MulterFile) {
+postFile(@FromFile("photo") photo: FilePart) {
   return Responses.OK({ title: photo.filename });
 }
 ```

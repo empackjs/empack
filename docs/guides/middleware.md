@@ -10,12 +10,11 @@ Empack middleware works similarly to Express middleware but with support for:
 
 There are two main ways to define middleware in Empack:
 
-### 1. Function-style middleware (Express-compatible)
+### 1. Function-style middleware
 
 ```ts
-const loggerMiddleware: EmpackMiddlewareFunction = (req, res, next) => {
+const loggerMiddleware: EmpackMiddlewareFunction = (req: FastifyRequest) => {
   console.log(`[${req.method}] ${req.url}`);
-  next();
 };
 
 app.useMiddleware(loggerMiddleware);
@@ -29,9 +28,8 @@ This style is mostly used for global middleware, such as CORS, parsers, static s
 export class LoggerMiddleware implements IEmpackMiddleware {
   constructor(private logger: Logger) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: FastifyRequest) {
     this.logger.log(`[${req.method}] ${req.url}`);
-    next();
   }
 }
 ```
@@ -46,25 +44,6 @@ export class UserController {
     return Responses.OK("User route")
   }
 }
-```
-
->[!NOTE]
-Class-based middleware is only available at controller/route level, and supports full DI — including request-scoped classes.
-
-## Global Middleware Cannot Use DI
-
-Global middleware registered via app.useMiddleware(...) must be function-style.
-They do not go through Empack's container system and cannot use dependency injection.
-
-```ts
-// ✅ Allowed
-app.useMiddleware((req, res, next) => {
-  console.log("Global middleware");
-  next();
-});
-
-// ❌ Not supported
-app.useMiddleware(SomeClassBasedMiddleware); // will not be injected
 ```
 
 ## Middleware Execution Order
@@ -84,9 +63,9 @@ This means:
 Here’s a typical middleware execution flow:
 
 ```
-[Global App Middleware]
-        ↓
 [Guard Middleware(if any)]
+        ↓
+[Global App Middleware]
         ↓
 [Controller Middleware]
         ↓
